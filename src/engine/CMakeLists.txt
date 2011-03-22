@@ -26,13 +26,18 @@ set(SOURCES
 	shared/storage.cpp
 )
 
-add_subdirectory ( external/zlib )
-add_subdirectory ( external/pnglite )
-add_subdirectory ( external/wavpack )
-
 # add_subdirectory ( client )
 # add_subdirectory ( server )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( 
+	${CMAKE_CURRENT_SOURCE_DIR}
+	../
+	../zlib
+	${CMAKE_CURRENT_BINARY_DIR}/zlib
+)
+
+add_subdirectory ( ../zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib )
 
 add_library(engine ${SOURCES})
+
+target_link_libraries (engine base)
