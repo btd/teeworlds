@@ -10,12 +10,8 @@ set(SOURCES
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
 	../../
-	${CMAKE_CURRENT_BINARY_DIR}/game
+
 )
-
-add_subdirectory ( ../../game  ${CMAKE_CURRENT_BINARY_DIR}/game )
-
-link_directories ( ${CMAKE_CURRENT_BINARY_DIR}/game )  
 
 add_executable(server ${SOURCES} )
 
