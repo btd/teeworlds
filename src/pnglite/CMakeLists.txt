@@ -6,6 +6,10 @@ set(SOURCES
 	pnglite.c
 )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( 
+	${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_library(pnglite ${SOURCES})
+
+target_link_libraries(pnglite zlib)

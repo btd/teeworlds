@@ -7,6 +7,47 @@ set(SOURCES
 	gamecore.cpp
 	layers.cpp
 	localization.cpp
+	client/animstate.cpp
+	client/gameclient.cpp
+	client/lineinput.cpp
+	client/render.cpp
+	client/render_map.cpp
+	client/ui.cpp
+	client/components/binds.cpp
+	client/components/broadcast.cpp
+	client/components/camera.cpp
+	client/components/chat.cpp
+	client/components/console.cpp
+	client/components/controls.cpp
+	client/components/damageind.cpp
+	client/components/debughud.cpp
+	client/components/effects.cpp
+	client/components/emoticon.cpp
+	client/components/flow.cpp
+	client/components/hud.cpp
+	client/components/items.cpp
+	client/components/killmessages.cpp
+	client/components/mapimages.cpp
+	client/components/maplayers.cpp
+	client/components/menus.cpp
+	client/components/menus_browser.cpp
+	client/components/menus_demo.cpp
+	client/components/menus_ingame.cpp
+	client/components/menus_settings.cpp
+	client/components/motd.cpp
+	client/components/nameplates.cpp
+	client/components/particles.cpp
+	client/components/players.cpp
+	client/components/scoreboard.cpp
+	client/components/skins.cpp
+	client/components/sounds.cpp
+	client/components/voting.cpp
+	editor/ed_editor.cpp
+	editor/ed_io.cpp
+	editor/ed_layer_game.cpp
+	editor/ed_layer_quads.cpp
+	editor/ed_layer_tiles.cpp
+	editor/ed_popups.cpp
 	server/entity.cpp
 	server/eventhandler.cpp
 	server/gamecontext.cpp

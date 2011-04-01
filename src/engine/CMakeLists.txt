@@ -26,7 +26,7 @@ set(SOURCES
 	shared/storage.cpp
 )
 
-# add_subdirectory ( client )
+add_subdirectory ( client )
 add_subdirectory ( server )
 
 
@@ -35,13 +35,16 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	../
 	../zlib
+	../pnglite
 	${CMAKE_CURRENT_BINARY_DIR}/zlib
 	${CMAKE_CURRENT_BINARY_DIR}/game
+
 )
 
 add_subdirectory ( ../zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib )
 add_subdirectory ( ../game ${CMAKE_CURRENT_BINARY_DIR}/game )
+add_subdirectory ( ../pnglite ${CMAKE_CURRENT_BINARY_DIR}/pnglite )
 
 add_library(engine ${SOURCES})
 
-target_link_libraries (engine base game zlib)
+target_link_libraries (engine base game zlib pnglite)

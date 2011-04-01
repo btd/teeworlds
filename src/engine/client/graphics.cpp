@@ -3,7 +3,7 @@
 
 #include <base/detect.h>
 
-#include "SDL.h"
+#include <SDL.h>
 
 #ifdef CONF_FAMILY_WINDOWS
 	#define WIN32_LEAN_AND_MEAN
@@ -19,7 +19,7 @@
 #endif
 
 #include <base/system.h>
-#include <engine/external/pnglite/pnglite.h>
+#include <pnglite.h>
 
 #include <engine/shared/engine.h>
 #include <engine/shared/config.h>

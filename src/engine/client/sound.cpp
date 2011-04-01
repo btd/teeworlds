@@ -3,12 +3,12 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
 
-#include "SDL.h"
+#include <SDL.h>
 
 #include "sound.h"
 
 extern "C" { // wavpack
-	#include <engine/external/wavpack/wavpack.h>
+	#include <wavpack.h>
 }
 #include <math.h>
 
