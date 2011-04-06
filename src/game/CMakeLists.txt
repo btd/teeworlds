@@ -19,6 +19,7 @@ set(SOURCES
 	client/components/chat.cpp
 	client/components/console.cpp
 	client/components/controls.cpp
+	client/components/countryflags.cpp
 	client/components/damageind.cpp
 	client/components/debughud.cpp
 	client/components/effects.cpp
@@ -39,6 +40,7 @@ set(SOURCES
 	client/components/particles.cpp
 	client/components/players.cpp
 	client/components/scoreboard.cpp
+	client/components/spectator.cpp
 	client/components/skins.cpp
 	client/components/sounds.cpp
 	client/components/voting.cpp

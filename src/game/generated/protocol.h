@@ -13,16 +13,13 @@ enum
 {
 	TEAM_SPECTATORS=-1,
 	TEAM_RED,
-	TEAM_BLUE
-};
+	TEAM_BLUE,
 
-enum
-{
-	PLAYERSTATE_UNKNOWN=0,
-	PLAYERSTATE_PLAYING,
-	PLAYERSTATE_IN_MENU,
-	PLAYERSTATE_CHATTING,
-	NUM_PLAYERSTATES
+	FLAG_MISSING=-3,
+	FLAG_ATSTAND,
+	FLAG_TAKEN,
+
+	SPEC_FREEVIEW=-1,
 };
 
 enum
@@ -47,7 +44,8 @@ enum
 
 enum
 {
-	EMOTICON_1=0,
+	EMOTICON_0=0,
+	EMOTICON_1,
 	EMOTICON_2,
 	EMOTICON_3,
 	EMOTICON_4,
@@ -67,8 +65,23 @@ enum
 
 enum
 {
+	PLAYERFLAG_PLAYING = 1<<0,
+	PLAYERFLAG_IN_MENU = 1<<1,
+	PLAYERFLAG_CHATTING = 1<<2,
+	PLAYERFLAG_SCOREBOARD = 1<<3,
+};
+
+enum
+{
 	GAMEFLAG_TEAMS = 1<<0,
 	GAMEFLAG_FLAGS = 1<<1,
+};
+
+enum
+{
+	GAMESTATEFLAG_GAMEOVER = 1<<0,
+	GAMESTATEFLAG_SUDDENDEATH = 1<<1,
+	GAMESTATEFLAG_PAUSED = 1<<2,
 };
 
 enum
@@ -79,11 +92,13 @@ enum
 	NETOBJTYPE_LASER,
 	NETOBJTYPE_PICKUP,
 	NETOBJTYPE_FLAG,
-	NETOBJTYPE_GAME,
+	NETOBJTYPE_GAMEINFO,
+	NETOBJTYPE_GAMEDATA,
 	NETOBJTYPE_CHARACTERCORE,
 	NETOBJTYPE_CHARACTER,
 	NETOBJTYPE_PLAYERINFO,
 	NETOBJTYPE_CLIENTINFO,
+	NETOBJTYPE_SPECTATORINFO,
 	NETEVENTTYPE_COMMON,
 	NETEVENTTYPE_EXPLOSION,
 	NETEVENTTYPE_SPAWN,
@@ -109,11 +124,14 @@ enum
 	NETMSGTYPE_SV_WEAPONPICKUP,
 	NETMSGTYPE_SV_EMOTICON,
 	NETMSGTYPE_SV_VOTECLEAROPTIONS,
-	NETMSGTYPE_SV_VOTEOPTION,
+	NETMSGTYPE_SV_VOTEOPTIONLISTADD,
+	NETMSGTYPE_SV_VOTEOPTIONADD,
+	NETMSGTYPE_SV_VOTEOPTIONREMOVE,
 	NETMSGTYPE_SV_VOTESET,
 	NETMSGTYPE_SV_VOTESTATUS,
 	NETMSGTYPE_CL_SAY,
 	NETMSGTYPE_CL_SETTEAM,
+	NETMSGTYPE_CL_SETSPECTATORMODE,
 	NETMSGTYPE_CL_STARTINFO,
 	NETMSGTYPE_CL_CHANGEINFO,
 	NETMSGTYPE_CL_KILL,
@@ -131,7 +149,7 @@ struct CNetObj_PlayerInput
 	int m_Jump;
 	int m_Fire;
 	int m_Hook;
-	int m_PlayerState;
+	int m_PlayerFlags;
 	int m_WantedWeapon;
 	int m_NextWeapon;
 	int m_PrevWeapon;
@@ -169,23 +187,26 @@ struct CNetObj_Flag
 	int m_X;
 	int m_Y;
 	int m_Team;
-	int m_CarriedBy;
 };
 
-struct CNetObj_Game
+struct CNetObj_GameInfo
 {
-	int m_Flags;
+	int m_GameFlags;
+	int m_GameStateFlags;
 	int m_RoundStartTick;
-	int m_GameOver;
-	int m_SuddenDeath;
-	int m_Paused;
+	int m_WarmupTimer;
 	int m_ScoreLimit;
 	int m_TimeLimit;
-	int m_Warmup;
 	int m_RoundNum;
 	int m_RoundCurrent;
+};
+
+struct CNetObj_GameData
+{
 	int m_TeamscoreRed;
 	int m_TeamscoreBlue;
+	int m_FlagCarrierRed;
+	int m_FlagCarrierBlue;
 };
 
 struct CNetObj_CharacterCore
@@ -209,7 +230,7 @@ struct CNetObj_CharacterCore
 
 struct CNetObj_Character : public CNetObj_CharacterCore
 {
-	int m_PlayerState;
+	int m_PlayerFlags;
 	int m_Health;
 	int m_Armor;
 	int m_AmmoCount;
@@ -225,7 +246,6 @@ struct CNetObj_PlayerInfo
 	int m_Team;
 	int m_Score;
 	int m_Latency;
-	int m_LatencyFlux;
 };
 
 struct CNetObj_ClientInfo
@@ -234,8 +254,10 @@ struct CNetObj_ClientInfo
 	int m_Name1;
 	int m_Name2;
 	int m_Name3;
-	int m_Name4;
-	int m_Name5;
+	int m_Clan0;
+	int m_Clan1;
+	int m_Clan2;
+	int m_Country;
 	int m_Skin0;
 	int m_Skin1;
 	int m_Skin2;
@@ -245,6 +267,13 @@ struct CNetObj_ClientInfo
 	int m_UseCustomColor;
 	int m_ColorBody;
 	int m_ColorFeet;
+};
+
+struct CNetObj_SpectatorInfo
+{
+	int m_SpectatorID;
+	int m_X;
+	int m_Y;
 };
 
 struct NETEVENT_COMMON
@@ -421,14 +450,68 @@ struct CNetMsg_Sv_VoteClearOptions
 	}
 };
 
-struct CNetMsg_Sv_VoteOption
+struct CNetMsg_Sv_VoteOptionListAdd
 {
-	const char *m_pCommand;
-	int MsgID() const { return NETMSGTYPE_SV_VOTEOPTION; }
+	int m_NumOptions;
+	const char *m_pDescription0;
+	const char *m_pDescription1;
+	const char *m_pDescription2;
+	const char *m_pDescription3;
+	const char *m_pDescription4;
+	const char *m_pDescription5;
+	const char *m_pDescription6;
+	const char *m_pDescription7;
+	const char *m_pDescription8;
+	const char *m_pDescription9;
+	const char *m_pDescription10;
+	const char *m_pDescription11;
+	const char *m_pDescription12;
+	const char *m_pDescription13;
+	const char *m_pDescription14;
+	int MsgID() const { return NETMSGTYPE_SV_VOTEOPTIONLISTADD; }
 	
 	bool Pack(CMsgPacker *pPacker)
 	{
-		pPacker->AddString(m_pCommand, -1);
+		pPacker->AddInt(m_NumOptions);
+		pPacker->AddString(m_pDescription0, -1);
+		pPacker->AddString(m_pDescription1, -1);
+		pPacker->AddString(m_pDescription2, -1);
+		pPacker->AddString(m_pDescription3, -1);
+		pPacker->AddString(m_pDescription4, -1);
+		pPacker->AddString(m_pDescription5, -1);
+		pPacker->AddString(m_pDescription6, -1);
+		pPacker->AddString(m_pDescription7, -1);
+		pPacker->AddString(m_pDescription8, -1);
+		pPacker->AddString(m_pDescription9, -1);
+		pPacker->AddString(m_pDescription10, -1);
+		pPacker->AddString(m_pDescription11, -1);
+		pPacker->AddString(m_pDescription12, -1);
+		pPacker->AddString(m_pDescription13, -1);
+		pPacker->AddString(m_pDescription14, -1);
+		return pPacker->Error() != 0;
+	}
+};
+
+struct CNetMsg_Sv_VoteOptionAdd
+{
+	const char *m_pDescription;
+	int MsgID() const { return NETMSGTYPE_SV_VOTEOPTIONADD; }
+	
+	bool Pack(CMsgPacker *pPacker)
+	{
+		pPacker->AddString(m_pDescription, -1);
+		return pPacker->Error() != 0;
+	}
+};
+
+struct CNetMsg_Sv_VoteOptionRemove
+{
+	const char *m_pDescription;
+	int MsgID() const { return NETMSGTYPE_SV_VOTEOPTIONREMOVE; }
+	
+	bool Pack(CMsgPacker *pPacker)
+	{
+		pPacker->AddString(m_pDescription, -1);
 		return pPacker->Error() != 0;
 	}
 };
@@ -437,14 +520,14 @@ struct CNetMsg_Sv_VoteSet
 {
 	int m_Timeout;
 	const char *m_pDescription;
-	const char *m_pCommand;
+	const char *m_pReason;
 	int MsgID() const { return NETMSGTYPE_SV_VOTESET; }
 	
 	bool Pack(CMsgPacker *pPacker)
 	{
 		pPacker->AddInt(m_Timeout);
 		pPacker->AddString(m_pDescription, -1);
-		pPacker->AddString(m_pCommand, -1);
+		pPacker->AddString(m_pReason, -1);
 		return pPacker->Error() != 0;
 	}
 };
@@ -493,9 +576,23 @@ struct CNetMsg_Cl_SetTeam
 	}
 };
 
+struct CNetMsg_Cl_SetSpectatorMode
+{
+	int m_SpectatorID;
+	int MsgID() const { return NETMSGTYPE_CL_SETSPECTATORMODE; }
+	
+	bool Pack(CMsgPacker *pPacker)
+	{
+		pPacker->AddInt(m_SpectatorID);
+		return pPacker->Error() != 0;
+	}
+};
+
 struct CNetMsg_Cl_StartInfo
 {
 	const char *m_pName;
+	const char *m_pClan;
+	int m_Country;
 	const char *m_pSkin;
 	int m_UseCustomColor;
 	int m_ColorBody;
@@ -505,6 +602,8 @@ struct CNetMsg_Cl_StartInfo
 	bool Pack(CMsgPacker *pPacker)
 	{
 		pPacker->AddString(m_pName, -1);
+		pPacker->AddString(m_pClan, -1);
+		pPacker->AddInt(m_Country);
 		pPacker->AddString(m_pSkin, -1);
 		pPacker->AddInt(m_UseCustomColor);
 		pPacker->AddInt(m_ColorBody);
@@ -516,6 +615,8 @@ struct CNetMsg_Cl_StartInfo
 struct CNetMsg_Cl_ChangeInfo
 {
 	const char *m_pName;
+	const char *m_pClan;
+	int m_Country;
 	const char *m_pSkin;
 	int m_UseCustomColor;
 	int m_ColorBody;
@@ -525,6 +626,8 @@ struct CNetMsg_Cl_ChangeInfo
 	bool Pack(CMsgPacker *pPacker)
 	{
 		pPacker->AddString(m_pName, -1);
+		pPacker->AddString(m_pClan, -1);
+		pPacker->AddInt(m_Country);
 		pPacker->AddString(m_pSkin, -1);
 		pPacker->AddInt(m_UseCustomColor);
 		pPacker->AddInt(m_ColorBody);
@@ -571,12 +674,14 @@ struct CNetMsg_Cl_CallVote
 {
 	const char *m_Type;
 	const char *m_Value;
+	const char *m_Reason;
 	int MsgID() const { return NETMSGTYPE_CL_CALLVOTE; }
 	
 	bool Pack(CMsgPacker *pPacker)
 	{
 		pPacker->AddString(m_Type, -1);
 		pPacker->AddString(m_Value, -1);
+		pPacker->AddString(m_Reason, -1);
 		return pPacker->Error() != 0;
 	}
 };
@@ -617,6 +722,7 @@ enum
 	SOUND_HIT,
 	SOUND_CHAT_SERVER,
 	SOUND_CHAT_CLIENT,
+	SOUND_CHAT_HIGHLIGHT,
 	SOUND_CTF_DROP,
 	SOUND_CTF_RETURN,
 	SOUND_CTF_GRAB_PL,

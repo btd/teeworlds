@@ -30,11 +30,13 @@ const char *CNetObjHandler::ms_apObjNames[] = {
 	"Laser",
 	"Pickup",
 	"Flag",
-	"Game",
+	"GameInfo",
+	"GameData",
 	"CharacterCore",
 	"Character",
 	"PlayerInfo",
 	"ClientInfo",
+	"SpectatorInfo",
 	"Common",
 	"Explosion",
 	"Spawn",
@@ -53,11 +55,13 @@ int CNetObjHandler::ms_aObjSizes[] = {
 	sizeof(CNetObj_Laser),
 	sizeof(CNetObj_Pickup),
 	sizeof(CNetObj_Flag),
-	sizeof(CNetObj_Game),
+	sizeof(CNetObj_GameInfo),
+	sizeof(CNetObj_GameData),
 	sizeof(CNetObj_CharacterCore),
 	sizeof(CNetObj_Character),
 	sizeof(CNetObj_PlayerInfo),
 	sizeof(CNetObj_ClientInfo),
+	sizeof(CNetObj_SpectatorInfo),
 	sizeof(NETEVENT_COMMON),
 	sizeof(NETEVENT_EXPLOSION),
 	sizeof(NETEVENT_SPAWN),
@@ -82,11 +86,14 @@ const char *CNetObjHandler::ms_apMsgNames[] = {
 	"Sv_WeaponPickup",
 	"Sv_Emoticon",
 	"Sv_VoteClearOptions",
-	"Sv_VoteOption",
+	"Sv_VoteOptionListAdd",
+	"Sv_VoteOptionAdd",
+	"Sv_VoteOptionRemove",
 	"Sv_VoteSet",
 	"Sv_VoteStatus",
 	"Cl_Say",
 	"Cl_SetTeam",
+	"Cl_SetSpectatorMode",
 	"Cl_StartInfo",
 	"Cl_ChangeInfo",
 	"Cl_Kill",
@@ -122,7 +129,7 @@ int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)
 	{
 		CNetObj_PlayerInput *pObj = (CNetObj_PlayerInput *)pData;
 		if(sizeof(*pObj) != Size) return -1;
-		ClampInt("m_PlayerState", pObj->m_PlayerState, 0, 4);
+		ClampInt("m_PlayerFlags", pObj->m_PlayerFlags, 0, 256);
 		return 0;
 	}
 	
@@ -157,24 +164,30 @@ int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)
 		CNetObj_Flag *pObj = (CNetObj_Flag *)pData;
 		if(sizeof(*pObj) != Size) return -1;
 		ClampInt("m_Team", pObj->m_Team, TEAM_RED, TEAM_BLUE);
-		ClampInt("m_CarriedBy", pObj->m_CarriedBy, -2, MAX_CLIENTS-1);
 		return 0;
 	}
 	
-	case NETOBJTYPE_GAME:
+	case NETOBJTYPE_GAMEINFO:
 	{
-		CNetObj_Game *pObj = (CNetObj_Game *)pData;
+		CNetObj_GameInfo *pObj = (CNetObj_GameInfo *)pData;
 		if(sizeof(*pObj) != Size) return -1;
-		ClampInt("m_Flags", pObj->m_Flags, 0, 256);
+		ClampInt("m_GameFlags", pObj->m_GameFlags, 0, 256);
+		ClampInt("m_GameStateFlags", pObj->m_GameStateFlags, 0, 256);
 		ClampInt("m_RoundStartTick", pObj->m_RoundStartTick, 0, max_int);
-		ClampInt("m_GameOver", pObj->m_GameOver, 0, 1);
-		ClampInt("m_SuddenDeath", pObj->m_SuddenDeath, 0, 1);
-		ClampInt("m_Paused", pObj->m_Paused, 0, 1);
+		ClampInt("m_WarmupTimer", pObj->m_WarmupTimer, 0, max_int);
 		ClampInt("m_ScoreLimit", pObj->m_ScoreLimit, 0, max_int);
 		ClampInt("m_TimeLimit", pObj->m_TimeLimit, 0, max_int);
-		ClampInt("m_Warmup", pObj->m_Warmup, 0, max_int);
 		ClampInt("m_RoundNum", pObj->m_RoundNum, 0, max_int);
 		ClampInt("m_RoundCurrent", pObj->m_RoundCurrent, 0, max_int);
+		return 0;
+	}
+	
+	case NETOBJTYPE_GAMEDATA:
+	{
+		CNetObj_GameData *pObj = (CNetObj_GameData *)pData;
+		if(sizeof(*pObj) != Size) return -1;
+		ClampInt("m_FlagCarrierRed", pObj->m_FlagCarrierRed, FLAG_MISSING, MAX_CLIENTS-1);
+		ClampInt("m_FlagCarrierBlue", pObj->m_FlagCarrierBlue, FLAG_MISSING, MAX_CLIENTS-1);
 		return 0;
 	}
 	
@@ -194,7 +207,7 @@ int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)
 	{
 		CNetObj_Character *pObj = (CNetObj_Character *)pData;
 		if(sizeof(*pObj) != Size) return -1;
-		ClampInt("m_PlayerState", pObj->m_PlayerState, 0, NUM_PLAYERSTATES-1);
+		ClampInt("m_PlayerFlags", pObj->m_PlayerFlags, 0, 256);
 		ClampInt("m_Health", pObj->m_Health, 0, 10);
 		ClampInt("m_Armor", pObj->m_Armor, 0, 10);
 		ClampInt("m_AmmoCount", pObj->m_AmmoCount, 0, 10);
@@ -219,6 +232,14 @@ int CNetObjHandler::ValidateObj(int Type, void *pData, int Size)
 		CNetObj_ClientInfo *pObj = (CNetObj_ClientInfo *)pData;
 		if(sizeof(*pObj) != Size) return -1;
 		ClampInt("m_UseCustomColor", pObj->m_UseCustomColor, 0, 1);
+		return 0;
+	}
+	
+	case NETOBJTYPE_SPECTATORINFO:
+	{
+		CNetObj_SpectatorInfo *pObj = (CNetObj_SpectatorInfo *)pData;
+		if(sizeof(*pObj) != Size) return -1;
+		ClampInt("m_SpectatorID", pObj->m_SpectatorID, SPEC_FREEVIEW, MAX_CLIENTS-1);
 		return 0;
 	}
 	
@@ -378,11 +399,41 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		(void)pMsg;
 	} break;
 	
-	case NETMSGTYPE_SV_VOTEOPTION:
+	case NETMSGTYPE_SV_VOTEOPTIONLISTADD:
 	{
-		CNetMsg_Sv_VoteOption *pMsg = (CNetMsg_Sv_VoteOption *)m_aMsgData;
+		CNetMsg_Sv_VoteOptionListAdd *pMsg = (CNetMsg_Sv_VoteOptionListAdd *)m_aMsgData;
 		(void)pMsg;
-		pMsg->m_pCommand = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_NumOptions = pUnpacker->GetInt();
+		pMsg->m_pDescription0 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription1 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription2 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription3 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription4 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription5 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription6 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription7 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription8 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription9 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription10 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription11 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription12 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription13 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pDescription14 = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		if(pMsg->m_NumOptions < 1 || pMsg->m_NumOptions > 15) { m_pMsgFailedOn = "m_NumOptions"; break; }
+	} break;
+	
+	case NETMSGTYPE_SV_VOTEOPTIONADD:
+	{
+		CNetMsg_Sv_VoteOptionAdd *pMsg = (CNetMsg_Sv_VoteOptionAdd *)m_aMsgData;
+		(void)pMsg;
+		pMsg->m_pDescription = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+	} break;
+	
+	case NETMSGTYPE_SV_VOTEOPTIONREMOVE:
+	{
+		CNetMsg_Sv_VoteOptionRemove *pMsg = (CNetMsg_Sv_VoteOptionRemove *)m_aMsgData;
+		(void)pMsg;
+		pMsg->m_pDescription = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 	} break;
 	
 	case NETMSGTYPE_SV_VOTESET:
@@ -391,7 +442,7 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		(void)pMsg;
 		pMsg->m_Timeout = pUnpacker->GetInt();
 		pMsg->m_pDescription = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-		pMsg->m_pCommand = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pReason = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 		if(pMsg->m_Timeout < 0 || pMsg->m_Timeout > 60) { m_pMsgFailedOn = "m_Timeout"; break; }
 	} break;
 	
@@ -426,11 +477,21 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		if(pMsg->m_Team < TEAM_SPECTATORS || pMsg->m_Team > TEAM_BLUE) { m_pMsgFailedOn = "m_Team"; break; }
 	} break;
 	
+	case NETMSGTYPE_CL_SETSPECTATORMODE:
+	{
+		CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)m_aMsgData;
+		(void)pMsg;
+		pMsg->m_SpectatorID = pUnpacker->GetInt();
+		if(pMsg->m_SpectatorID < SPEC_FREEVIEW || pMsg->m_SpectatorID > MAX_CLIENTS-1) { m_pMsgFailedOn = "m_SpectatorID"; break; }
+	} break;
+	
 	case NETMSGTYPE_CL_STARTINFO:
 	{
 		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)m_aMsgData;
 		(void)pMsg;
 		pMsg->m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_Country = pUnpacker->GetInt();
 		pMsg->m_pSkin = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 		pMsg->m_UseCustomColor = pUnpacker->GetInt();
 		pMsg->m_ColorBody = pUnpacker->GetInt();
@@ -443,6 +504,8 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		CNetMsg_Cl_ChangeInfo *pMsg = (CNetMsg_Cl_ChangeInfo *)m_aMsgData;
 		(void)pMsg;
 		pMsg->m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_Country = pUnpacker->GetInt();
 		pMsg->m_pSkin = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 		pMsg->m_UseCustomColor = pUnpacker->GetInt();
 		pMsg->m_ColorBody = pUnpacker->GetInt();
@@ -478,6 +541,7 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		(void)pMsg;
 		pMsg->m_Type = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 		pMsg->m_Value = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+		pMsg->m_Reason = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 	} break;
 	
 	default:

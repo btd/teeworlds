@@ -15,6 +15,7 @@ set(SOURCES
 	shared/linereader.cpp
 	shared/map.cpp
 	shared/masterserver.cpp
+	shared/mapchecker.cpp
 	shared/memheap.cpp
 	shared/network.cpp
 	shared/network_client.cpp

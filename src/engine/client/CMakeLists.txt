@@ -5,9 +5,10 @@ project (client)
 set(SOURCES
 	client.cpp
 	graphics.cpp
+	friends.cpp
 	input.cpp
 	sound.cpp
-	srvbrowse.cpp
+	serverbrowser.cpp
 	text.cpp
 )
 
@@ -20,7 +21,7 @@ set(FREETYPE_DIR
 )
 
 set(FREETYPE_LIB
-	${FREETYPE_DIR}/lib/freetype243MT.lib
+	${FREETYPE_DIR}/lib/freetype.lib
 )
 
 set(SDL_LIB 
