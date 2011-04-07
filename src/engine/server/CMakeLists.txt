@@ -2,15 +2,11 @@ cmake_minimum_required (VERSION 2.8)
 
 project (server)
 
-set(SOURCES
-	server.cpp
-	register.cpp
-)
+file( GLOB SOURCES *.h *.cpp )
 
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
 	../../
-
 )
 
 add_executable(server ${SOURCES} )

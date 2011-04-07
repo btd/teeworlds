@@ -2,71 +2,10 @@ cmake_minimum_required (VERSION 2.8)
 
 project (game)
 
-set(SOURCES
-	collision.cpp
-	gamecore.cpp
-	layers.cpp
-	localization.cpp
-	client/animstate.cpp
-	client/gameclient.cpp
-	client/lineinput.cpp
-	client/render.cpp
-	client/render_map.cpp
-	client/ui.cpp
-	client/components/binds.cpp
-	client/components/broadcast.cpp
-	client/components/camera.cpp
-	client/components/chat.cpp
-	client/components/console.cpp
-	client/components/controls.cpp
-	client/components/countryflags.cpp
-	client/components/damageind.cpp
-	client/components/debughud.cpp
-	client/components/effects.cpp
-	client/components/emoticon.cpp
-	client/components/flow.cpp
-	client/components/hud.cpp
-	client/components/items.cpp
-	client/components/killmessages.cpp
-	client/components/mapimages.cpp
-	client/components/maplayers.cpp
-	client/components/menus.cpp
-	client/components/menus_browser.cpp
-	client/components/menus_demo.cpp
-	client/components/menus_ingame.cpp
-	client/components/menus_settings.cpp
-	client/components/motd.cpp
-	client/components/nameplates.cpp
-	client/components/particles.cpp
-	client/components/players.cpp
-	client/components/scoreboard.cpp
-	client/components/spectator.cpp
-	client/components/skins.cpp
-	client/components/sounds.cpp
-	client/components/voting.cpp
-	editor/ed_editor.cpp
-	editor/ed_io.cpp
-	editor/ed_layer_game.cpp
-	editor/ed_layer_quads.cpp
-	editor/ed_layer_tiles.cpp
-	editor/ed_popups.cpp
-	server/entity.cpp
-	server/eventhandler.cpp
-	server/gamecontext.cpp
-	server/gamecontroller.cpp
-	server/gameworld.cpp
-	server/player.cpp
-	server/entities/character.cpp
-	server/entities/flag.cpp
-	server/entities/laser.cpp
-	server/entities/pickup.cpp
-	server/entities/projectile.cpp
-	server/gamemodes/ctf.cpp
-	server/gamemodes/dm.cpp
-	server/gamemodes/mod.cpp
-	server/gamemodes/tdm.cpp
-)
-
+file( GLOB SHARED_GAME_SOURCES *.h *.cpp )
+file( GLOB_RECURSE CLIENT_GAME_SOURCES client/*.h client/*.cpp )
+file( GLOB_RECURSE SERVER_GAME_SOURCES server/*.h server/*.cpp )
+file( GLOB_RECURSE EDITOR_GAME_SOURCES editor/*.h editor/*.cpp )
 
 set( PYTHON C:/Python27/pythonw.exe )
 set( NETWORK_SOURCE ${game_SOURCE_DIR}/generated/protocol.cpp )
@@ -121,6 +60,12 @@ add_custom_command (
 )
 
 
-add_library(game ${SOURCES} ${GENERATED_CONTENT} )
+add_library(game 
+	${SHARED_GAME_SOURCES} 
+	${CLIENT_GAME_SOURCES} 
+	${SERVER_GAME_SOURCES} 
+	${EDITOR_GAME_SOURCES}
+	${GENERATED_CONTENT} 
+)
 
 target_link_libraries (game base engine)

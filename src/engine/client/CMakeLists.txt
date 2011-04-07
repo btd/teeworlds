@@ -2,15 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 
 project (client)
 
-set(SOURCES
-	client.cpp
-	graphics.cpp
-	friends.cpp
-	input.cpp
-	sound.cpp
-	serverbrowser.cpp
-	text.cpp
-)
+file( GLOB SOURCES *.h *.cpp )
 
 set(SDL_DIR 
 	${client_SOURCE_DIR}/../../sdl 
@@ -29,13 +21,17 @@ set(SDL_LIB
 	${SDL_DIR}/vc2005libs/SDL.lib
 )
 
+IF(MSVC)
 set(WIN_GL_LIBS
 		opengl32.lib
 		glu32.lib
 		winmm.lib
 )
+ENDIF(MSVC)
 
 add_subdirectory ( ../../wavpack ${CMAKE_CURRENT_BINARY_DIR}/wavpack )
+
+link_directories ( ${SDL_DIR}/vc2005libs ${FREETYPE_DIR}/lib )
 
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -56,5 +52,8 @@ target_link_libraries (client
 	wavpack 
 	${SDL_LIB} 
 	${FREETYPE_LIB}
-	${WIN_GL_LIBS}
 )
+
+IF(MSVC)
+target_link_libraries (client ${WIN_GL_LIBS})
+ENDIF(MSVC)
