@@ -195,7 +195,7 @@ int CServer::TrySetClientName(int ClientID, const char *pName)
 	StrRtrim(aTrimmedName);
 
 	// check if new and old name are the same
-	if(str_comp(m_aClients[ClientID].m_aName, aTrimmedName) == 0)
+	if(m_aClients[ClientID].m_aName[0] && str_comp(m_aClients[ClientID].m_aName, aTrimmedName) == 0)
 		return 0;
 
 	char aBuf[256];
@@ -1395,12 +1395,12 @@ void CServer::ConBans(IConsole::IResult *pResult, void *pUser)
 		
 		if(Info.m_Expires == -1)
 		{
-			str_format(aBuf, sizeof(aBuf), "#%s for life", i, aAddrStr);
+			str_format(aBuf, sizeof(aBuf), "#%i %s for life", i, aAddrStr);
 		}
 		else
 		{
 			unsigned t = Info.m_Expires - Now;
-			str_format(aBuf, sizeof(aBuf), "#%s for %d minutes and %d seconds", i, aAddrStr, t/60, t%60);
+			str_format(aBuf, sizeof(aBuf), "#%i %s for %d minutes and %d seconds", i, aAddrStr, t/60, t%60);
 		}
 		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Server", aBuf);
 	}

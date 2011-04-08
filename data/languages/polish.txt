@@ -350,7 +350,7 @@ Server details
 == Szczegóły serwera
 
 Server info
-== Informacje o serwerze
+== Server info
 
 Server not full
 == Nie pokazuj pełnych
@@ -570,19 +570,10 @@ Netversion:
 New name:
 == 
 
-Next
-== 
-
-Page %d of %d
-== 
-
 Parent Folder
 == 
 
 Player options
-== 
-
-Prev
 == 
 
 Quit anyway?
