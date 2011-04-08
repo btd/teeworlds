@@ -1,0 +1,2 @@
+/usr/bin/ar cr libwavpack.a  CMakeFiles/wavpack.dir/bits.c.o CMakeFiles/wavpack.dir/float.c.o CMakeFiles/wavpack.dir/metadata.c.o CMakeFiles/wavpack.dir/unpack.c.o CMakeFiles/wavpack.dir/words.c.o CMakeFiles/wavpack.dir/wputils.c.o
+/usr/bin/ranlib libwavpack.a

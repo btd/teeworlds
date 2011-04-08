@@ -22,4 +22,9 @@ set(WIN_LIBS
 target_link_libraries ( base ${WIN_LIBS})
 ENDIF(MSVC)
 
+find_package(Threads)
+target_link_libraries(base
+	${CMAKE_THREAD_LIBS_INIT}
+)
+
 

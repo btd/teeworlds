@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/den/Desktop/teeworlds/src/versionsrv/versionsrv.cpp
+base/system.h
+-
+engine/shared/network.h
+-
+versionsrv.h
+/home/den/Desktop/teeworlds/src/versionsrv/versionsrv.h
+
+/home/den/Desktop/teeworlds/src/versionsrv/versionsrv.h
+
+src/versionsrv/../base/detect.h
+
+src/versionsrv/../base/system.h
+detect.h
+src/versionsrv/../base/detect.h
+
+src/versionsrv/../engine/shared/huffman.h
+
+src/versionsrv/../engine/shared/network.h
+ringbuffer.h
+src/versionsrv/../engine/shared/ringbuffer.h
+huffman.h
+src/versionsrv/../engine/shared/huffman.h
+
+src/versionsrv/../engine/shared/ringbuffer.h
+

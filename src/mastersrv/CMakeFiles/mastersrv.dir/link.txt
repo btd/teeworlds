@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/mastersrv.dir/mastersrv.cpp.o  -o mastersrv -rdynamic ../versionsrv/base/libbase.a ../engine/libengine.a ../engine/game/libgame.a ../engine/libengine.a ../engine/game/libgame.a ../engine/pnglite/libpnglite.a ../engine/zlib/libzlib.a ../versionsrv/base/libbase.a -lpthread 

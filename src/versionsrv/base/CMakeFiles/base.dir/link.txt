@@ -1,0 +1,2 @@
+/usr/bin/ar cr libbase.a  CMakeFiles/base.dir/system.c.o
+/usr/bin/ranlib libbase.a
