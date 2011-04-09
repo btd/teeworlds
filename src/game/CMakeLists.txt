@@ -31,32 +31,32 @@ include_directories(
 
 add_custom_command (
   OUTPUT  ${NETWORK_HEADER}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py network_header > ${NETWORK_HEADER}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py network_header > ${NETWORK_HEADER}
 )
 
 add_custom_command (
   OUTPUT  ${NETWORK_SOURCE}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py network_source > ${NETWORK_SOURCE}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py network_source > ${NETWORK_SOURCE}
 )
 
 add_custom_command (
   OUTPUT  ${CLIENT_CONTENT_SOURCE}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py client_content_source > ${CLIENT_CONTENT_SOURCE}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py client_content_source > ${CLIENT_CONTENT_SOURCE}
 )
 
 add_custom_command (
   OUTPUT  ${CLIENT_CONTENT_HEADER}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py client_content_header > ${CLIENT_CONTENT_HEADER}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py client_content_header > ${CLIENT_CONTENT_HEADER}
 )
 
 add_custom_command (
   OUTPUT  ${SERVER_CONTENT_SOURCE}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py server_content_source > ${SERVER_CONTENT_SOURCE}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py server_content_source > ${SERVER_CONTENT_SOURCE}
 )
 
 add_custom_command (
   OUTPUT  ${SERVER_CONTENT_HEADER}
-  COMMAND ${PYTHON} ${game_SOURCE_DIR}/generated/compile.py server_content_header > ${SERVER_CONTENT_HEADER}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py server_content_header > ${SERVER_CONTENT_HEADER}
 )
 
 

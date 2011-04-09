@@ -1,14 +1,18 @@
-import os, imp, sys
-from datatypes import *
+
+import inspect
+
+import sys
+
 import content
+from datatypes import *
 import network
 
 def create_enum_table(names, num):
 	lines = []
 	lines += ["enum", "{"]
-	lines += ["\t%s=0,"%names[0]]
+	lines += ["\t%s=0," % names[0]]
 	for name in names[1:]:
-		lines += ["\t%s,"%name]
+		lines += ["\t%s," % name]
 	lines += ["\t%s" % num, "};"]
 	return lines
 
@@ -17,11 +21,11 @@ def create_flags_table(names):
 	lines += ["enum", "{"]
 	i = 0
 	for name in names:
-		lines += ["\t%s = 1<<%d," % (name,i)]
+		lines += ["\t%s = 1<<%d," % (name, i)]
 		i += 1
 	lines += ["};"]
 	return lines
-	
+
 def EmitEnum(names, num):
 	print("enum")
 	print("{")
@@ -36,7 +40,7 @@ def EmitFlags(names, num):
 	print("{")
 	i = 0
 	for name in names:
-		print("\t%s = 1<<%d," % (name,i))
+		print("\t%s = 1<<%d," % (name, i))
 		i += 1
 	print("};")
 
@@ -65,12 +69,12 @@ if gen_server_content_header:
 
 if gen_client_content_header or gen_server_content_header:
 	# emit the type declarations
-	contentlines = open("datasrc/content.py", "rb").readlines()
+	contentlines = open(inspect.getsourcefile(content), "rb").readlines()
 	order = []
 	for line in contentlines:
-		line = line.strip()
-		if line[:6] == "class ".encode() and "(Struct)".encode() in line:
-			order += [line.split()[1].split("(".encode())[0].decode("ascii")]
+	    line = line.strip()
+	    if line[:6] == "class ".encode() and "(Struct)".encode() in line:
+	        order += [line.split()[1].split("(".encode())[0].decode("ascii")]
 	for name in order:
 		EmitTypeDeclaration(content.__dict__[name])
 
@@ -92,31 +96,31 @@ if gen_client_content_source or gen_server_content_source:
 
 # NETWORK
 if gen_network_header:
-	
+
 	print("#ifndef GAME_GENERATED_PROTOCOL_H")
 	print("#define GAME_GENERATED_PROTOCOL_H")
 	print(network.RawHeader)
-	
+
 	for e in network.Enums:
-		for l in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): print(l)
+		for l in create_enum_table(["%s_%s" % (e.name, v) for v in e.values], 'NUM_%sS' % e.name): print(l)
 		print("")
 
 	for e in network.Flags:
 		for l in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]): print(l)
 		print("")
-		
-	for l in create_enum_table(["NETOBJ_INVALID"]+[o.enum_name for o in network.Objects], "NUM_NETOBJTYPES"): print(l)
+
+	for l in create_enum_table(["NETOBJ_INVALID"] + [o.enum_name for o in network.Objects], "NUM_NETOBJTYPES"): print(l)
 	print("")
-	for l in create_enum_table(["NETMSG_INVALID"]+[o.enum_name for o in network.Messages], "NUM_NETMSGTYPES"): print(l)
+	for l in create_enum_table(["NETMSG_INVALID"] + [o.enum_name for o in network.Messages], "NUM_NETMSGTYPES"): print(l)
 	print("")
-		
+
 	for item in network.Objects + network.Messages:
 		for line in item.emit_declaration():
 			print(line)
 		print("")
-		
-	EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
-	EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
+
+	EmitEnum(["SOUND_%s" % i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
+	EmitEnum(["WEAPON_%s" % i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 	print("""
 
@@ -127,11 +131,11 @@ class CNetObjHandler
 	char m_aMsgData[1024];
 	int m_NumObjCorrections;
 	int ClampInt(const char *pErrorMsg, int Value, int Min, int Max);
-	
+
 	static const char *ms_apObjNames[];
 	static int ms_aObjSizes[];
 	static const char *ms_apMsgNames[];
-	
+
 public:
 	CNetObjHandler();
 
@@ -140,7 +144,7 @@ public:
 	int GetObjSize(int Type);
 	int NumObjCorrections();
 	const char *CorrectedObjOn();
-	
+
 	const char *GetMsgName(int Type);
 	void *SecureUnpackMsg(int Type, CUnpacker *pUnpacker);
 	const char *FailedMsgOn();
@@ -149,16 +153,16 @@ public:
 """)
 
 	print("#endif // GAME_GENERATED_PROTOCOL_H")
-	
+
 
 if gen_network_source:
 	# create names
 	lines = []
-	
+
 	lines += ['#include <engine/shared/protocol.h>']
 	lines += ['#include <engine/message.h>']
 	lines += ['#include "protocol.h"']
-	
+
 	lines += ['CNetObjHandler::CNetObjHandler()']
 	lines += ['{']
 	lines += ['\tm_pMsgFailedOn = "";']
@@ -202,7 +206,7 @@ if gen_network_source:
 	lines += ['\t""']
 	lines += ['};']
 	lines += ['']
-	
+
 	lines += ['const char *CNetObjHandler::GetObjName(int Type)']
 	lines += ['{']
 	lines += ['\tif(Type < 0 || Type >= NUM_NETOBJTYPES) return "(out of range)";']
@@ -216,16 +220,16 @@ if gen_network_source:
 	lines += ['\treturn ms_aObjSizes[Type];']
 	lines += ['};']
 	lines += ['']
-	
-	
+
+
 	lines += ['const char *CNetObjHandler::GetMsgName(int Type)']
 	lines += ['{']
 	lines += ['\tif(Type < 0 || Type >= NUM_NETMSGTYPES) return "(out of range)";']
 	lines += ['\treturn ms_apMsgNames[Type];']
 	lines += ['};']
 	lines += ['']
-		
-	
+
+
 	for l in lines:
 		print(l)
 
@@ -255,7 +259,7 @@ if gen_network_source:
 	lines += ['{']
 	lines += ['\tswitch(Type)']
 	lines += ['\t{']
-	
+
 	for item in network.Objects:
 		for line in item.emit_validate():
 			lines += ["\t" + line]
@@ -264,9 +268,9 @@ if gen_network_source:
 	lines += ['\treturn -1;']
 	lines += ['};']
 	lines += ['']
-		
- #int Validate(int Type, void *pData, int Size);	
-	
+
+#int Validate(int Type, void *pData, int Size);	
+
 	if 0:
 		for item in network.Messages:
 			for line in item.emit_unpack():
@@ -281,20 +285,20 @@ if gen_network_source:
 			lines += ['\tsecure_unpack_%s,' % msg.name]
 		lines += ['\t0x0']
 		lines += ['};']
-	
+
 	#
 	lines += ['void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)']
 	lines += ['{']
 	lines += ['\tm_pMsgFailedOn = 0;']
 	lines += ['\tswitch(Type)']
 	lines += ['\t{']
-	
-	
+
+
 	for item in network.Messages:
 		for line in item.emit_unpack():
 			lines += ["\t" + line]
 		lines += ['\t']
-		
+
 	lines += ['\tdefault:']
 	lines += ['\t\tm_pMsgFailedOn = "(type out of range)";']
 	lines += ['\t\tbreak;']
@@ -313,6 +317,6 @@ if gen_network_source:
 
 	for l in lines:
 		print(l)
-	
+
 if gen_client_content_header or gen_server_content_header:
 	print("#endif")
