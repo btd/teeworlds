@@ -8,6 +8,8 @@ set(SOURCES
 
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
+	${zlib_SOURCE_DIR}
+	${zlib_BINARY_DIR}
 )
 
 add_library(pnglite ${SOURCES})

@@ -29,8 +29,6 @@ link_directories (
 	${SDL_LINK_DIRECTORIES} 
 )
 
-add_subdirectory ( ../../wavpack ${CMAKE_CURRENT_BINARY_DIR}/wavpack )
-
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
 	../../

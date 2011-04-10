@@ -5,12 +5,7 @@ project (versionsrv)
 include_directories( 
 	${CMAKE_CURRENT_SOURCE_DIR}
 	../
-	${CMAKE_CURRENT_BINARY_DIR}/base
-)
-
-add_subdirectory ( ../base  ${CMAKE_CURRENT_BINARY_DIR}/base )
-
-link_directories ( ${CMAKE_CURRENT_BINARY_DIR}/base )  
+) 
 
 add_executable(versionsrv versionsrv.cpp)
 
