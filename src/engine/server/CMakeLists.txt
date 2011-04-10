@@ -9,6 +9,11 @@ include_directories(
 	../../
 )
 
-add_executable(server ${SOURCES} ${CMAKE_SOURCE_DIR}/other/icons/teeworlds_srv_cl.rc)
+if(MSVC)
+list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/other/icons/teeworlds_srv_cl.rc)
+endif()
+
+
+add_executable(server ${SOURCES})
 
 target_link_libraries (server base engine game)

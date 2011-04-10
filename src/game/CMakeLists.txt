@@ -14,6 +14,7 @@ set( CLIENT_CONTENT_SOURCE ${game_SOURCE_DIR}/generated/client_data.cpp )
 set( CLIENT_CONTENT_HEADER ${game_SOURCE_DIR}/generated/client_data.h )
 set( SERVER_CONTENT_SOURCE ${game_SOURCE_DIR}/generated/server_data.cpp)
 set( SERVER_CONTENT_HEADER ${game_SOURCE_DIR}/generated/server_data.h )
+set( NETHASH ${game_SOURCE_DIR}/generated/nethash.c )
 
 set (GENERATED_CONTENT
 	${NETWORK_HEADER}
@@ -22,6 +23,7 @@ set (GENERATED_CONTENT
 	${CLIENT_CONTENT_HEADER}
 	${SERVER_CONTENT_SOURCE}
 	${SERVER_CONTENT_HEADER}
+	${NETHASH}
 )
 
 include_directories( 
@@ -58,6 +60,13 @@ add_custom_command (
   OUTPUT  ${SERVER_CONTENT_HEADER}
   COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/datasrc/compile.py server_content_header > ${SERVER_CONTENT_HEADER}
 )
+
+add_custom_command (
+  OUTPUT  ${NETHASH}
+  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/scripts/cmd5.py ${CMAKE_SOURCE_DIR}/src/engine/shared/protocol.h ${CMAKE_SOURCE_DIR}/src/game/generated/protocol.h ${CMAKE_SOURCE_DIR}/src/game/tuning.h ${CMAKE_SOURCE_DIR}/src/game/gamecore.cpp > ${NETHASH}
+)
+
+
 
 
 add_library(game 

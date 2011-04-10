@@ -41,7 +41,11 @@ include_directories(
 	${OPENGL_INCLUDE_DIR}
 )
 
-add_executable(client ${SOURCES} ${CMAKE_SOURCE_DIR}/other/icons/teeworlds_cl.rc )
+if(MSVC)
+list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/other/icons/teeworlds_cl.rc)
+endif()
+
+add_executable(client ${SOURCES})
 
 target_link_libraries (client 
 	base 
