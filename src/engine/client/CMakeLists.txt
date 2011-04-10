@@ -56,5 +56,9 @@ target_link_libraries (client
 	${OPENGL_LIBRARIES}
 )
 
+if(MSVC)
+target_link_libraries (client winmm.lib)
+endif()
+
 
 
