@@ -195,7 +195,7 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 int CSound::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = IStorage::instance();
 	
 	SDL_AudioSpec Format;
 	

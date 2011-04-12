@@ -6,6 +6,8 @@
 #include <engine/map.h>
 #include <game/mapitems.h>
 
+#include <boost/smart_ptr.hpp>
+
 class CLayers
 {
 	int m_GroupsNum;
@@ -14,13 +16,13 @@ class CLayers
 	int m_LayersStart;
 	CMapItemGroup *m_pGameGroup;
 	CMapItemLayerTilemap *m_pGameLayer;
-	class IMap *m_pMap;
+	boost::shared_ptr< IMap >  m_pMap;
 
 public:
 	CLayers();
-	void Init(class IKernel *pKernel);
+	void Init();
 	int NumGroups() const { return m_GroupsNum; };
-	class IMap *Map() const { return m_pMap; };
+	boost::shared_ptr< IMap > Map() const { return m_pMap; };
 	CMapItemGroup *GameGroup() const { return m_pGameGroup; };
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; };
 	CMapItemGroup *GetGroup(int Index) const;

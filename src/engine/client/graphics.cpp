@@ -672,7 +672,7 @@ void CGraphics_OpenGL::QuadsText(float x, float y, float Size, float r, float g,
 
 bool CGraphics_OpenGL::Init()
 {
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = IStorage::instance();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	
 	// Set all z to -5.0f

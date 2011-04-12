@@ -3,6 +3,9 @@
 #ifndef ENGINE_SHARED_DATAFILE_H
 #define ENGINE_SHARED_DATAFILE_H
 
+#include <engine/kernel.h>
+
+class IStorage;
 // raw datafile access
 class CDataFileReader
 {
@@ -14,10 +17,10 @@ public:
 	
 	bool IsOpen() const { return m_pDataFile != 0; }
 	
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Open(boost::shared_ptr < IStorage> pStorage, const char *pFilename, int StorageType);
 	bool Close();
 
-	static bool GetCrcSize(class IStorage *pStorage, const char *pFilename, int StorageType, unsigned *pCrc, unsigned *pSize);
+	static bool GetCrcSize(boost::shared_ptr < IStorage> pStorage, const char *pFilename, int StorageType, unsigned *pCrc, unsigned *pSize);
 	
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
@@ -71,7 +74,7 @@ class CDataFileWriter
 	
 public:
 	CDataFileWriter() : m_File(0) {}
-	bool Open(class IStorage *pStorage, const char *Filename);
+	bool Open(boost::shared_ptr < IStorage> pStorage, const char *Filename);
 	int AddData(int Size, void *pData);
 	int AddDataSwapped(int Size, void *pData);
 	int AddItem(int Type, int ID, int Size, void *pData);

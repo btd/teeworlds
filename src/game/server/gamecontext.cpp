@@ -1317,7 +1317,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
 
-void CGameContext::OnInit(/*class IKernel *pKernel*/)
+void CGameContext::OnInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -1330,7 +1330,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
-	m_Layers.Init(Kernel());
+	m_Layers.Init();
 	m_Collision.Init(&m_Layers);
 
 	// reset everything here
@@ -1353,7 +1353,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
-	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
+	CTile *pTiles = (CTile *)IEngineMap::instance()->GetData(pTileMap->m_Data);
 	
 	
 	

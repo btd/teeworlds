@@ -111,7 +111,7 @@ void CGameClient::OnConsoleInit()
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = IStorage::instance();
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pDemoRecorder = Kernel()->RequestInterface<IDemoRecorder>();
 	m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
@@ -318,7 +318,7 @@ int CGameClient::OnSnapInput(int *pData)
 
 void CGameClient::OnConnected()
 {
-	m_Layers.Init(Kernel());
+	m_Layers.Init();
 	m_Collision.Init(Layers());
 	
 	RenderTools()->RenderTilemapGenerateSkip(Layers());

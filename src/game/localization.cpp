@@ -44,7 +44,7 @@ void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr)
 	m_Strings.add(s);
 }
 
-bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
+bool CLocalizationDatabase::Load(const char *pFilename, boost::shared_ptr<IStorage> pStorage, IConsole *pConsole)
 {
 	// empty string means unload
 	if(pFilename[0] == 0)
@@ -106,7 +106,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash)
 	sorted_array<CString>::range r = ::find_binary(m_Strings.all(), String);
 	if(r.empty())
 		return 0;
-	return r.front().m_Replacement;
+	return r.front().m_Replacement.c_str();
 }
 
 CLocalizationDatabase g_Localization;

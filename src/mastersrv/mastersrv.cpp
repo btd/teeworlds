@@ -395,17 +395,13 @@ int main(int argc, const char **argv) // ignore_convention
 	mem_copy(m_CountDataLegacy.m_Header, SERVERBROWSE_COUNT_LEGACY, sizeof(SERVERBROWSE_COUNT_LEGACY));
 
 	IKernel *pKernel = IKernel::Create();
-	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv);
+	IStorage::set(CreateStorage("Teeworlds", argc, argv));
 
 	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv");
 
-	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
-	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);
+	pKernel->RegisterInterface(m_pConsole);
 
-	if(RegisterFail)
-		return -1;
-	
 	dbg_msg("mastersrv", "started");
 	
 	while(1)

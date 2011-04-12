@@ -197,10 +197,10 @@ void editor_load_old(DATAFILE *df, MAP *map)
 
 int CEditor::Save(const char *pFilename)
 {
-	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
+	return m_Map.Save(IStorage::instance(), pFilename);
 }
 
-int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+int CEditorMap::Save(boost::shared_ptr < IStorage>  pStorage, const char *pFileName)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
@@ -379,10 +379,10 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 int CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	return m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	return m_Map.Load(IStorage::instance(), pFileName, StorageType);
 }
 
-int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+int CEditorMap::Load(boost::shared_ptr < IStorage > pStorage, const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
 	//DATAFILE *df = datafile_load(filename);
@@ -598,7 +598,7 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	NewMap.m_pEditor = this;
 
 	int Err;
-	Err = NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	Err = NewMap.Load(IStorage::instance(), pFileName, StorageType);
 	if(!Err)
 		return Err;
 

@@ -15,7 +15,7 @@ CMapImages::CMapImages()
 
 void CMapImages::OnMapLoad()
 {
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
+	boost::shared_ptr< IMap > pMap = IEngineMap::instance();
 	
 	// unload all textures
 	for(int i = 0; i < m_Count; i++)

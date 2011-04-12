@@ -20,7 +20,7 @@ class CEngine : public IEngine
 {
 public:
 	IConsole *m_pConsole;
-	IStorage *m_pStorage;
+	boost::shared_ptr < IStorage > m_pStorage;
 	bool m_Logging;
 
 	static void Con_DbgDumpmem(IConsole::IResult *pResult, void *pUserData)
@@ -82,7 +82,7 @@ public:
 	void Init()
 	{
 		m_pConsole = Kernel()->RequestInterface<IConsole>();
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
+		m_pStorage = IStorage::instance();
 
 		if(!m_pConsole || !m_pStorage)
 			return;

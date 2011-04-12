@@ -8,7 +8,7 @@ CConfiguration g_Config;
 
 class CConfig : public IConfig
 {
-	IStorage *m_pStorage;
+	boost::shared_ptr< IStorage > m_pStorage;
 	IOHANDLE m_ConfigFile;
 	
 	struct CCallback
@@ -46,7 +46,7 @@ public:
 	
 	virtual void Init()
 	{
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
+		m_pStorage = IStorage::instance();
 		Reset();
 	}
 	

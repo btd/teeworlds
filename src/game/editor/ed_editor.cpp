@@ -3300,7 +3300,7 @@ void CEditor::Init()
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = IStorage::instance();
 	m_RenderTools.m_pGraphics = m_pGraphics;
 	m_RenderTools.m_pUI = &m_UI;
 	m_UI.SetGraphics(m_pGraphics, m_pTextRender);

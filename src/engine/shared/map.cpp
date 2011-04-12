@@ -5,11 +5,12 @@
 #include <engine/storage.h>
 #include "datafile.h"
 
+
+
 class CMap : public IEngineMap
 {
 	CDataFileReader m_DataFile;
 public:
-	CMap() {}
 	
 	virtual void *GetData(int Index) { return m_DataFile.GetData(Index); }
 	virtual void *GetDataSwapped(int Index) { return m_DataFile.GetDataSwapped(Index); }
@@ -26,10 +27,7 @@ public:
 
 	virtual bool Load(const char *pMapName)
 	{
-		IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
-		if(!pStorage)
-			return false;
-		return m_DataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL);
+		return m_DataFile.Open(IStorage::instance(), pMapName, IStorage::TYPE_ALL);
 	}
 	
 	virtual bool IsLoaded()
@@ -43,4 +41,13 @@ public:
 	}
 };
 
-extern IEngineMap *CreateEngineMap() { return new CMap; }
+template<  >
+IEngineMap * create< IEngineMap >() { return new CMap; }
+
+
+
+boost::shared_ptr< IEngineMap > IEngineMap::g_instance(create< IEngineMap >());
+
+boost::shared_ptr< IEngineMap > IEngineMap::instance() {
+    return g_instance;
+}

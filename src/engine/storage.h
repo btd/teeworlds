@@ -5,10 +5,17 @@
 
 #include "kernel.h"
 
-class IStorage : public IInterface
+#include <boost/smart_ptr.hpp>
+
+class IStorage
 {
-	MACRO_INTERFACE("storage", 0)
+	static boost::shared_ptr< IStorage > g_instance;
+	static bool g_inited;
+	
 public:
+    static boost::shared_ptr< IStorage > instance();
+    static void set(IStorage * pStorage);
+
 	enum
 	{
 		TYPE_SAVE = 0,
@@ -24,6 +31,5 @@ public:
 };
 
 extern IStorage *CreateStorage(const char *pApplicationName, int NumArgs, const char **ppArguments);
-
 
 #endif

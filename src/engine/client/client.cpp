@@ -308,7 +308,7 @@ void CFileCollection::BuildTimestring(int64 Timestamp, char *pTimestring)
 	pTimestring[0] = (Timestamp&0xF)+'0';
 }
 
-void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
+void CFileCollection::Init(boost::shared_ptr < IStorage > pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
 {
 	mem_zero(m_aTimestamps, sizeof(m_aTimestamps));
 	m_NumTimestamps = 0;
@@ -417,7 +417,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_pGraphics = 0;
 	m_pSound = 0;
 	m_pGameClient = 0;
-	m_pMap = 0;
 	m_pConsole = 0;
 
 	m_FrameTime = 0.0001f;
@@ -1845,9 +1844,9 @@ void CClient::InitInterfaces()
 	m_pSound = Kernel()->RequestInterface<IEngineSound>();
 	m_pGameClient = Kernel()->RequestInterface<IGameClient>();
 	m_pInput = Kernel()->RequestInterface<IEngineInput>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
+	m_pMap = IEngineMap::instance();
 	m_pMasterServer = Kernel()->RequestInterface<IEngineMasterServer>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pStorage = IStorage::instance();
 
 	//
 	m_ServerBrowser.SetBaseInfo(&m_NetClient, m_pGameClient->NetVersion());
@@ -2370,13 +2369,13 @@ int main(int argc, const char **argv) // ignore_convention
 	// create the components
 	IEngine *pEngine = CreateEngine("Teeworlds");
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
-	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv); // ignore_convention
+	IStorage::set(CreateStorage("Teeworlds", argc, argv)); 
 	IConfig *pConfig = CreateConfig();
 	IEngineGraphics *pEngineGraphics = CreateEngineGraphics();
 	IEngineSound *pEngineSound = CreateEngineSound();
 	IEngineInput *pEngineInput = CreateEngineInput();
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
-	IEngineMap *pEngineMap = CreateEngineMap();
+
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 
 	{
@@ -2398,15 +2397,12 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineTextRender*>(pEngineTextRender)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<ITextRender*>(pEngineTextRender));
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMap*>(pEngineMap)); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap*>(pEngineMap));
-
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateEditor());
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(CreateGameClient());
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+
 
 		if(RegisterFail)
 			return -1;

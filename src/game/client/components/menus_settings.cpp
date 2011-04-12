@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <string>
+
 #include <base/math.h>
 
 
@@ -800,7 +802,7 @@ public:
 	bool operator<(const CLanguage &Other) { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(IStorage *pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
+void LoadLanguageIndexfile(boost::shared_ptr< IStorage > pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
 {
 	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)
@@ -853,7 +855,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 		s_Languages.add(CLanguage("English", ""));
 		LoadLanguageIndexfile(Storage(), Console(), &s_Languages);
 		for(int i = 0; i < s_Languages.size(); i++)
-			if(str_comp(s_Languages[i].m_FileName, g_Config.m_ClLanguagefile) == 0)
+			if(s_Languages[i].m_FileName.compare(g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
 				break;
@@ -869,15 +871,15 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&r.front());
 
 		if(Item.m_Visible)
-			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name, 16.0f, -1);
+			UI()->DoLabelScaled(&Item.m_Rect, r.front().m_Name.c_str(), 16.0f, -1);
 	}
 
 	s_SelectedLanguage = UiDoListboxEnd(&s_ScrollValue, 0);
 
 	if(OldSelected != s_SelectedLanguage)
 	{
-		str_copy(g_Config.m_ClLanguagefile, s_Languages[s_SelectedLanguage].m_FileName, sizeof(g_Config.m_ClLanguagefile));
-		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName, Storage(), Console());
+	    s_Languages[s_SelectedLanguage].m_FileName = g_Config.m_ClLanguagefile;
+		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 	}
 }
 

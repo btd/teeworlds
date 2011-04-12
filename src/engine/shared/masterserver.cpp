@@ -26,7 +26,7 @@ public:
 	CMasterInfo m_aMasterServers[MAX_MASTERSERVERS];
 	int m_NeedsUpdate;
 	IEngine *m_pEngine;
-	IStorage *m_pStorage;
+	boost::shared_ptr < IStorage > m_pStorage;
 	
 	CMasterServer()
 	{
@@ -119,7 +119,7 @@ public:
 	virtual void Init()
 	{
 		m_pEngine = Kernel()->RequestInterface<IEngine>();
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
+		m_pStorage = IStorage::instance();
 	}
 
 	virtual void SetDefault()

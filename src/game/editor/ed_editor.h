@@ -8,7 +8,7 @@
 #include <base/tl/array.h>
 #include <base/tl/algorithm.h>
 #include <base/tl/sorted_array.h>
-#include <base/tl/string.h>
+
 
 #include <math.h>
 #include <game/mapitems.h>
@@ -326,8 +326,8 @@ public:
 	void CreateDefault(int EntitiesTexture);
 
 	// io	
-	int Save(class IStorage *pStorage, const char *pFilename);
-	int Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	int Save(boost::shared_ptr< IStorage > pStorage, const char *pFilename);
+	int Load(boost::shared_ptr< IStorage > pStorage, const char *pFilename, int StorageType);
 };
 
 
@@ -446,7 +446,7 @@ class CEditor : public IEditor
 	class IConsole *m_pConsole;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
-	class IStorage *m_pStorage;
+	boost::shared_ptr< IStorage > m_pStorage;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 public:
@@ -455,7 +455,7 @@ public:
 	class IConsole *Console() { return m_pConsole; };
 	class IGraphics *Graphics() { return m_pGraphics; };
 	class ITextRender *TextRender() { return m_pTextRender; };
-	class IStorage *Storage() { return m_pStorage; };
+	boost::shared_ptr< IStorage > Storage() { return m_pStorage; };
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 

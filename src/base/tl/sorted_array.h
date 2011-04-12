@@ -5,6 +5,7 @@
 
 #include "algorithm.h"
 #include "array.h"
+#include "../system.h"
 
 template <class T, class ALLOCATOR = allocator_default<T> >
 class sorted_array : public array<T, ALLOCATOR>

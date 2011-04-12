@@ -331,10 +331,9 @@ void CConsole::ExecuteFile(const char *pFilename)
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
 			return;
 
-	if(!m_pStorage)
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
-	if(!m_pStorage)
-		return;
+	
+	m_pStorage = IStorage::instance();
+	
 		
 	// push this one to the stack
 	CExecFile ThisFile;
@@ -469,7 +468,6 @@ CConsole::CConsole(int FlagMask)
 	m_pPrintCallbackUserdata = 0;
 	m_pfnPrintCallback = 0;
 	
-	m_pStorage = 0;
 	
 	// register some basic commands
 	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");

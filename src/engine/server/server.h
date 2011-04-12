@@ -43,11 +43,11 @@ class CServer : public IServer
 {
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
-	class IStorage *m_pStorage;
+	boost::shared_ptr < IStorage > m_pStorage;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
-	class IStorage *Storage() { return m_pStorage; }
+	boost::shared_ptr < IStorage > Storage() { return m_pStorage; }
 
 	class CClient
 	{
@@ -103,7 +103,7 @@ public:
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
 	
-	IEngineMap *m_pMap;
+	boost::shared_ptr< IEngineMap > m_pMap;
 
 	int64 m_GameStartTime;
 	//int m_CurrentGameTick;

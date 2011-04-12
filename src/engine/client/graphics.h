@@ -3,10 +3,12 @@
 #ifndef ENGINE_CLIENT_GRAPHICS_H
 #define ENGINE_CLIENT_GRAPHICS_H
 
+#include <boost/smart_ptr.hpp>
+
 class CGraphics_OpenGL : public IEngineGraphics
 {
 protected:
-	class IStorage *m_pStorage;
+	boost::shared_ptr < IStorage > m_pStorage;
 	class IConsole *m_pConsole;
 	
 	//

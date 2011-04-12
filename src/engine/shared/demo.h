@@ -23,7 +23,7 @@ class CDemoRecorder : public IDemoRecorder
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta);
 	
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType);
+	int Start(boost::shared_ptr < IStorage > pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType);
 	int Stop();
 
 	void RecordSnapshot(int Tick, const void *pData, int Size);
@@ -102,7 +102,7 @@ public:
 	
 	void SetListner(IListner *pListner);
 		
-	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
+	int Load(boost::shared_ptr < IStorage > pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
 	int Play();
 	void Pause();
 	void Unpause();
@@ -111,7 +111,7 @@ public:
 	int SetPos(float Precent);
 	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
 	char *GetDemoName();
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const;
+	bool GetDemoInfo(boost::shared_ptr < IStorage > pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const;
 	int GetDemoType() const;
 	
 	int Update();

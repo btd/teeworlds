@@ -1097,8 +1097,8 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 int CServer::Run()
 {
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
-	m_pMap = Kernel()->RequestInterface<IEngineMap>();
-	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pMap = IEngineMap::instance();
+	m_pStorage = IStorage::instance();
 
 	//
 	Console()->RegisterPrintCallback(SendRconLineAuthed, this);
@@ -1543,7 +1543,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// create the components
 	IEngine *pEngine = CreateEngine("Teeworlds");
-	IEngineMap *pEngineMap = CreateEngineMap();
+
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER);
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
@@ -1557,11 +1557,10 @@ int main(int argc, const char **argv) // ignore_convention
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pServer); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMap*>(pEngineMap)); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap*>(pEngineMap));
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pGameServer);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
+		
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
@@ -1598,11 +1597,10 @@ int main(int argc, const char **argv) // ignore_convention
 	// free
 	delete pServer;
 	delete pKernel;
-	delete pEngineMap;
+
 	delete pGameServer;
 	delete pConsole;
 	delete pEngineMasterServer;
-	delete pStorage;
 	delete pConfig;
 	return 0;
 }

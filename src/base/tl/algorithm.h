@@ -4,7 +4,9 @@
 #define TL_FILE_ALGORITHM_HPP
 
 #include "range.h"
+#include <algorithm>
 
+using std::swap;
 
 /*
 	insert 4

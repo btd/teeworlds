@@ -67,14 +67,14 @@ class CFileCollection
 	char m_aFileExt[32];
 	int m_FileExtLength;
 	char m_aPath[512];
-	IStorage *m_pStorage;
+	boost::shared_ptr < IStorage > m_pStorage;
 
 	bool IsFilenameValid(const char *pFilename);
 	int64 ExtractTimestamp(const char *pTimestring);
 	void BuildTimestring(int64 Timestamp, char *pTimestring);
 
 public:
-	void Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
+	void Init(boost::shared_ptr < IStorage > pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
 	void AddEntry(int64 Timestamp);
 
 	static int FilelistCallback(const char *pFilename, int IsDir, int StorageType, void *pUser);
@@ -90,9 +90,9 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngineGraphics *m_pGraphics;
 	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
-	IEngineMap *m_pMap;
+	boost::shared_ptr< IEngineMap > m_pMap;
 	IConsole *m_pConsole;
-	IStorage *m_pStorage;
+	boost::shared_ptr< IStorage > m_pStorage;
 	IEngineMasterServer *m_pMasterServer;
 
 	enum
@@ -209,7 +209,7 @@ public:
 	IEngineSound *Sound() { return m_pSound; }
 	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
-	IStorage *Storage() { return m_pStorage; }
+	boost::shared_ptr< IStorage > Storage() { return m_pStorage; }
 
 	CClient();
 

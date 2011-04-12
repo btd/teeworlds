@@ -5,6 +5,8 @@
 
 #include "kernel.h"
 
+class IStorage;
+
 struct CDemoHeader
 {
 	unsigned char m_aMarker[7];
@@ -47,7 +49,7 @@ public:
 	virtual void Unpause() = 0;
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual char *GetDemoName() = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const = 0;
+	virtual bool GetDemoInfo(boost::shared_ptr < IStorage > pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader) const = 0;
 	virtual int GetDemoType() const = 0;
 };
 

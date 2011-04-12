@@ -4,11 +4,20 @@
 #include <engine/storage.h>
 #include "linereader.h"
 
+#include <boost/make_shared.hpp>
+
 // compiled-in data-dir path
 #define DATA_DIR "data"
 
 class CStorage : public IStorage
 {
+    CStorage()
+	{
+		mem_zero(m_aaStoragePaths, sizeof(m_aaStoragePaths));
+		m_NumPaths = 0;
+		m_aDatadir[0] = 0;
+		m_aUserdir[0] = 0;
+	}
 public:
 	enum
 	{
@@ -22,13 +31,7 @@ public:
 	char m_aUserdir[MAX_PATH_LENGTH];
 	char m_aCurrentdir[MAX_PATH_LENGTH];
 	
-	CStorage()
-	{
-		mem_zero(m_aaStoragePaths, sizeof(m_aaStoragePaths));
-		m_NumPaths = 0;
-		m_aDatadir[0] = 0;
-		m_aUserdir[0] = 0;
-	}
+	
 	
 	int Init(const char *pApplicationName, int NumArgs, const char **ppArguments)
 	{
@@ -390,4 +393,19 @@ public:
 	}
 };
 
-IStorage *CreateStorage(const char *pApplicationName, int NumArgs, const char **ppArguments) { return CStorage::Create(pApplicationName, NumArgs, ppArguments); }
+IStorage *CreateStorage(const char *pApplicationName, int NumArgs, const char **ppArguments) {
+    return CStorage::Create(pApplicationName, NumArgs, ppArguments);
+}
+boost::shared_ptr< IStorage > IStorage::g_instance;
+
+bool IStorage::g_inited = false;
+
+boost::shared_ptr< IStorage > IStorage::instance() { return g_instance; }
+
+void IStorage::set(IStorage * pStorage) {
+    if(!IStorage::g_inited) {
+        IStorage::g_inited = true;
+        IStorage::g_instance = boost::shared_ptr<IStorage>(pStorage);
+    }
+}
+

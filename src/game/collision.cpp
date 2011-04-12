@@ -6,7 +6,7 @@
 
 #include <math.h>
 #include <engine/map.h>
-#include <engine/kernel.h>
+
 
 #include <game/mapitems.h>
 #include <game/layers.h>

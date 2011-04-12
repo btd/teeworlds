@@ -5,10 +5,17 @@
 
 #include "kernel.h"
 
-class IMap : public IInterface
+
+
+
+class IMap 
 {
-	MACRO_INTERFACE("map", 0)
+	
+		
 public:
+
+    
+
 	virtual void *GetData(int Index) = 0;
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
@@ -21,14 +28,18 @@ public:
 
 class IEngineMap : public IMap
 {
-	MACRO_INTERFACE("enginemap", 0)
+    static boost::shared_ptr< IEngineMap > g_instance;
+	
+
 public:
+    static boost::shared_ptr< IEngineMap > instance();
+    
 	virtual bool Load(const char *pMapName) = 0;
 	virtual bool IsLoaded() = 0;
 	virtual void Unload() = 0;
 	virtual unsigned Crc() = 0;
 };
 
-extern IEngineMap *CreateEngineMap();
+
 
 #endif

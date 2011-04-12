@@ -7,7 +7,7 @@ file( GLOB_RECURSE CLIENT_GAME_SOURCES client/*.h client/*.cpp )
 file( GLOB_RECURSE SERVER_GAME_SOURCES server/*.h server/*.cpp )
 file( GLOB_RECURSE EDITOR_GAME_SOURCES editor/*.h editor/*.cpp )
 
-set( PYTHON C:/Python27/pythonw.exe )
+set( PYTHON python )
 set( NETWORK_SOURCE ${game_SOURCE_DIR}/generated/protocol.cpp )
 set( NETWORK_HEADER ${game_SOURCE_DIR}/generated/protocol.h )
 set( CLIENT_CONTENT_SOURCE ${game_SOURCE_DIR}/generated/client_data.cpp )
@@ -64,6 +64,7 @@ add_custom_command (
 add_custom_command (
   OUTPUT  ${NETHASH}
   COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/scripts/cmd5.py ${CMAKE_SOURCE_DIR}/src/engine/shared/protocol.h ${CMAKE_SOURCE_DIR}/src/game/generated/protocol.h ${CMAKE_SOURCE_DIR}/src/game/tuning.h ${CMAKE_SOURCE_DIR}/src/game/gamecore.cpp > ${NETHASH}
+  DEPENDS ${NETWORK_HEADER}
 )
 
 

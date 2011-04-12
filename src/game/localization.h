@@ -2,8 +2,13 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_LOCALIZATION_H
 #define GAME_LOCALIZATION_H
-#include <base/tl/string.h>
+#include <string>
 #include <base/tl/sorted_array.h>
+#include <boost/smart_ptr.hpp>
+
+using std::string;
+
+class IStorage;
 
 class CLocalizationDatabase
 {
@@ -27,7 +32,7 @@ class CLocalizationDatabase
 public:
 	CLocalizationDatabase();
 
-	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
+	bool Load(const char *pFilename, boost::shared_ptr<IStorage> pStorage, class IConsole *pConsole);
 
 	int Version() { return m_CurrentVersion; }
 	

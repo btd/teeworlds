@@ -5,6 +5,11 @@
 
 #include <base/system.h>
 
+#include <boost/smart_ptr.hpp>
+
+template< class Interface >
+Interface * create() { return NULL; }
+
 class IKernel;
 class IInterface;
 
