@@ -22,13 +22,13 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta)
 }
 
 // Record
-int CDemoRecorder::Start(class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType)
+int CDemoRecorder::Start(const char *pFilename, const char *pNetVersion, const char *pMap, unsigned Crc, const char *pType)
 {
 	CDemoHeader Header;
 	if(m_File)
 		return -1;
 
-	m_pConsole = pConsole;
+	m_pConsole = IConsole::instance();
 	
 	boost::shared_ptr<IStorage> pStorage = IStorage::instance();
 
@@ -535,9 +535,9 @@ void CDemoPlayer::Unpause()
 	}
 }
 
-int CDemoPlayer::Load(class IConsole *pConsole, const char *pFilename, int StorageType)
+int CDemoPlayer::Load(const char *pFilename, int StorageType)
 {
-	m_pConsole = pConsole;
+	m_pConsole = IConsole::instance();
 	boost::shared_ptr<IStorage> pStorage = IStorage::instance();
 	m_File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!m_File)

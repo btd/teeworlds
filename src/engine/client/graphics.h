@@ -9,7 +9,7 @@ class CGraphics_OpenGL : public IEngineGraphics
 {
 protected:
 	boost::shared_ptr < IStorage > m_pStorage;
-	class IConsole *m_pConsole;
+	boost::shared_ptr < IConsole > m_pConsole;
 
 	//
 	typedef struct { float x, y, z; } CPoint;

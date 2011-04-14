@@ -89,7 +89,7 @@ static int m_NumBans = 0;
 static CNetClient m_NetChecker; // NAT/FW checker
 static CNetClient m_NetOp; // main
 
-IConsole *m_pConsole;
+
 
 void BuildPackets()
 {
@@ -362,7 +362,7 @@ void ConAddBan(IConsole::IResult *pResult, void *pUser)
 void ReloadBans()
 {
 	m_NumBans = 0;
-	m_pConsole->ExecuteFile("master.cfg");
+	IConsole::instance()->ExecuteFile("master.cfg");
 }
 
 int main(int argc, const char **argv) // ignore_convention
@@ -394,14 +394,12 @@ int main(int argc, const char **argv) // ignore_convention
 	mem_copy(m_CountData.m_Header, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT));
 	mem_copy(m_CountDataLegacy.m_Header, SERVERBROWSE_COUNT_LEGACY, sizeof(SERVERBROWSE_COUNT_LEGACY));
 
-	IKernel *pKernel = IKernel::Create();
 	IStorage::set(CreateStorage("Teeworlds", argc, argv));
+    IConsole::set(CreateConsole(CFGFLAG_MASTER));
+    
+    boost::shared_ptr < IConsole> m_pConsole = IConsole::instance();
 
-	m_pConsole = CreateConsole(CFGFLAG_MASTER);
 	m_pConsole->Register("ban", "s", CFGFLAG_MASTER, ConAddBan, 0, "Ban IP from mastersrv");
-
-	pKernel->RegisterInterface(m_pConsole);
-
 
 	dbg_msg("mastersrv", "started");
 

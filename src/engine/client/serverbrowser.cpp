@@ -66,7 +66,7 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	m_pNetClient = pClient;
 	str_copy(m_aNetVersion, pNetVersion, sizeof(m_aNetVersion));
 	m_pMasterServer = Kernel()->RequestInterface<IMasterServer>();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
 	if(pConfig)

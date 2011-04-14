@@ -23,6 +23,8 @@
 
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
+class IConsole;
+
 //CRenderTools m_RenderTools;
 
 // CEditor SPECIFIC
@@ -443,7 +445,7 @@ class CEditor : public IEditor
 {
 	class IInput *m_pInput;
 	class IClient *m_pClient;
-	class IConsole *m_pConsole;
+	boost::shared_ptr< IConsole > m_pConsole;
 	class IGraphics *m_pGraphics;
 	class ITextRender *m_pTextRender;
 	boost::shared_ptr< IStorage > m_pStorage;
@@ -452,7 +454,7 @@ class CEditor : public IEditor
 public:
 	class IInput *Input() { return m_pInput; };
 	class IClient *Client() { return m_pClient; };
-	class IConsole *Console() { return m_pConsole; };
+	boost::shared_ptr< IConsole > Console() { return m_pConsole; };
 	class IGraphics *Graphics() { return m_pGraphics; };
 	class ITextRender *TextRender() { return m_pTextRender; };
 	boost::shared_ptr< IStorage > Storage() { return m_pStorage; };

@@ -14,7 +14,6 @@ CRegister::CRegister()
 {
 	m_pNetServer = 0;
 	m_pMasterServer = 0;
-	m_pConsole = 0;
 
 	m_RegisterState = REGISTERSTATE_START;
 	m_RegisterStateStart = 0;
@@ -90,11 +89,11 @@ void CRegister::RegisterGotCount(CNetChunk *pChunk)
 	}
 }
 
-void CRegister::Init(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole)
+void CRegister::Init(CNetServer *pNetServer, IEngineMasterServer *pMasterServer)
 {
 	m_pNetServer = pNetServer;
 	m_pMasterServer = pMasterServer;
-	m_pConsole = pConsole;
+	m_pConsole = IConsole::instance();
 }
 
 void CRegister::RegisterUpdate(int Nettype)

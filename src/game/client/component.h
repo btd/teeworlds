@@ -23,7 +23,7 @@ protected:
 	class CUI *UI() const { return m_pClient->UI(); }
 	class ISound *Sound() const { return m_pClient->Sound(); }
 	class CRenderTools *RenderTools() const { return m_pClient->RenderTools(); }
-	class IConsole *Console() const { return m_pClient->Console(); }
+	boost::shared_ptr<IConsole> Console() const { return m_pClient->Console(); }
 	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
 	class IDemoRecorder *DemoRecorder() const { return m_pClient->DemoRecorder(); }
 	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }

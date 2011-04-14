@@ -1295,7 +1295,7 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 
 	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "");
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "");
@@ -1320,7 +1320,7 @@ void CGameContext::OnConsoleInit()
 void CGameContext::OnInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 

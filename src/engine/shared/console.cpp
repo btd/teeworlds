@@ -579,3 +579,17 @@ IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int FlagMask
 
 
 extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
+
+boost::shared_ptr< IConsole > IConsole::g_instance;
+
+bool IConsole::g_inited = false;
+
+boost::shared_ptr< IConsole > IConsole::instance() { return g_instance; }
+
+void IConsole::set(IConsole * pConsole) {
+    if(!IConsole::g_inited) {
+        IConsole::g_inited = true;
+        IConsole::g_instance = boost::shared_ptr<IConsole>(pConsole);
+    }
+}
+

@@ -670,7 +670,7 @@ void CGameConsole::OnConsoleInit()
 	m_LocalConsole.Init(this);
 	m_RemoteConsole.Init(this);
 
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	//m_pConsole = IConsole::instance();
 
 	//
 	Console()->RegisterPrintCallback(ClientConsolePrintCallback, this);

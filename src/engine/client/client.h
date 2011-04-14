@@ -91,7 +91,7 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	IEngineSound *m_pSound;
 	IGameClient *m_pGameClient;
 	boost::shared_ptr< IEngineMap > m_pMap;
-	IConsole *m_pConsole;
+	boost::shared_ptr< IConsole > m_pConsole;
 	boost::shared_ptr< IStorage > m_pStorage;
 	IEngineMasterServer *m_pMasterServer;
 

@@ -39,7 +39,7 @@
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
-	class IConsole *m_pConsole;
+	boost::shared_ptr< IConsole > m_pConsole;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -67,7 +67,7 @@ class CGameContext : public IGameServer
 	bool m_Resetting;
 public:
 	IServer *Server() const { return m_pServer; }
-	class IConsole *Console() { return m_pConsole; }
+	boost::shared_ptr < IConsole > Console() { return m_pConsole; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 

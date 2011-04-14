@@ -3299,7 +3299,7 @@ void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();
 	m_pClient = Kernel()->RequestInterface<IClient>();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = IStorage::instance();

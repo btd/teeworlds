@@ -32,7 +32,7 @@ class CLocalizationDatabase
 public:
 	CLocalizationDatabase();
 
-	bool Load(const char *pFilename, boost::shared_ptr<IStorage> pStorage, class IConsole *pConsole);
+	bool Load(const char *pFilename);
 
 	int Version() { return m_CurrentVersion; }
 

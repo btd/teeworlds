@@ -42,11 +42,11 @@ public:
 class CServer : public IServer
 {
 	class IGameServer *m_pGameServer;
-	class IConsole *m_pConsole;
+	boost::shared_ptr < IConsole > m_pConsole;
 	boost::shared_ptr < IStorage > m_pStorage;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
-	class IConsole *Console() { return m_pConsole; }
+	boost::shared_ptr < IConsole > Console() { return m_pConsole; }
 	boost::shared_ptr < IStorage > Storage() { return m_pStorage; }
 
 	class CClient
@@ -177,7 +177,7 @@ public:
 	char *GetMapName();
 	int LoadMap(const char *pMapName);
 
-	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole);
+	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer);
 	int Run();
 
 	static void ConKick(IConsole::IResult *pResult, void *pUser);

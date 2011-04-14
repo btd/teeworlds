@@ -19,7 +19,7 @@ static int HostLookupThread(void *pUser)
 class CEngine : public IEngine
 {
 public:
-	IConsole *m_pConsole;
+	boost::shared_ptr < IConsole > m_pConsole;
 	boost::shared_ptr < IStorage > m_pStorage;
 	bool m_Logging;
 
@@ -81,11 +81,8 @@ public:
 
 	void Init()
 	{
-		m_pConsole = Kernel()->RequestInterface<IConsole>();
+		m_pConsole = IConsole::instance();
 		m_pStorage = IStorage::instance();
-
-		if(!m_pConsole || !m_pStorage)
-			return;
 
 		m_pConsole->Register("dbg_dumpmem", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgDumpmem, this, "Dump the memory");
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");

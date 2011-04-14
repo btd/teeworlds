@@ -110,7 +110,7 @@ void CGameClient::OnConsoleInit()
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_pInput = Kernel()->RequestInterface<IInput>();
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 	m_pStorage = IStorage::instance();
 	m_pDemoPlayer = Kernel()->RequestInterface<IDemoPlayer>();
 	m_pDemoRecorder = Kernel()->RequestInterface<IDemoRecorder>();
@@ -235,7 +235,7 @@ void CGameClient::OnInit()
 	int64 Start = time_get();
 
 	// set the language
-	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
+	g_Localization.Load(g_Config.m_ClLanguagefile);
 
 	// TODO: this should be different
 	// setup item sizes

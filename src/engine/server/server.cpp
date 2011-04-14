@@ -1089,9 +1089,9 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
-void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, IConsole *pConsole)
+void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer)
 {
-	m_Register.Init(pNetServer, pMasterServer, pConsole);
+	m_Register.Init(pNetServer, pMasterServer);
 }
 
 int CServer::Run()
@@ -1450,7 +1450,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aDate);
 	}
-	pServer->m_DemoRecorder.Start(pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapCrc, "server");
+	pServer->m_DemoRecorder.Start(aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapCrc, "server");
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
@@ -1479,7 +1479,7 @@ void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pU
 
 void CServer::RegisterCommands()
 {
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "");
 	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBan, this, "");
@@ -1545,12 +1545,12 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngine *pEngine = CreateEngine("Teeworlds");
 
 	IGameServer *pGameServer = CreateGameServer();
-	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER);
+	IConsole::set(CreateConsole(CFGFLAG_SERVER));
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
-	IStorage *pStorage = CreateStorage("Teeworlds", argc, argv); // ignore_convention
+	IStorage::set(CreateStorage("Teeworlds", argc, argv));
 	IConfig *pConfig = CreateConfig();
 
-	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConsole);
+	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer);
 
 	{
 		bool RegisterFail = false;
@@ -1559,7 +1559,6 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pGameServer);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
@@ -1577,6 +1576,8 @@ int main(int argc, const char **argv) // ignore_convention
 	// register all console commands
 	pServer->RegisterCommands();
 	pGameServer->OnConsoleInit();
+	
+	boost::shared_ptr < IConsole > pConsole = IConsole::instance();
 
 	// execute autoexec file
 	pConsole->ExecuteFile("autoexec.cfg");
@@ -1597,9 +1598,7 @@ int main(int argc, const char **argv) // ignore_convention
 	// free
 	delete pServer;
 	delete pKernel;
-
 	delete pGameServer;
-	delete pConsole;
 	delete pEngineMasterServer;
 	delete pConfig;
 	return 0;

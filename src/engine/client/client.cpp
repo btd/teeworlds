@@ -417,7 +417,6 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_pGraphics = 0;
 	m_pSound = 0;
 	m_pGameClient = 0;
-	m_pConsole = 0;
 
 	m_FrameTime = 0.0001f;
 	m_FrameTimeLow = 1.0f;
@@ -2182,7 +2181,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	// try to start playback
 	m_DemoPlayer.SetListner(this);
 
-	if(m_DemoPlayer.Load(m_pConsole, pFilename, StorageType))
+	if(m_DemoPlayer.Load(pFilename, StorageType))
 		return "error loading demo";
 
 	// load map
@@ -2245,7 +2244,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp)
 		}
 		else
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
-		m_DemoRecorder.Start(m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
+		m_DemoRecorder.Start(aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_CurrentMapCrc, "client");
 	}
 }
 
@@ -2298,7 +2297,7 @@ void CClient::ConchainServerBrowserUpdate(IConsole::IResult *pResult, void *pUse
 
 void CClient::RegisterCommands()
 {
-	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConsole = IConsole::instance();
 	// register server dummy commands for tab completion
 	m_pConsole->Register("kick", "i?r", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason");
 	m_pConsole->Register("ban", "s?ir", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason");
@@ -2368,7 +2367,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// create the components
 	IEngine *pEngine = CreateEngine("Teeworlds");
-	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT);
+	IConsole::set(CreateConsole(CFGFLAG_CLIENT));
 	IStorage::set(CreateStorage("Teeworlds", argc, argv)); 
 	IConfig *pConfig = CreateConfig();
 	IEngineGraphics *pEngineGraphics = CreateEngineGraphics();
@@ -2382,7 +2381,6 @@ int main(int argc, const char **argv) // ignore_convention
 		bool RegisterFail = false;
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfig);
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineGraphics*>(pEngineGraphics)); // register graphics as both
@@ -2420,6 +2418,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// init client's interfaces
 	m_Client.InitInterfaces();
+	
+	boost::shared_ptr < IConsole> pConsole = IConsole::instance();
 
 	// execute config file
 	pConsole->ExecuteFile("settings.cfg");

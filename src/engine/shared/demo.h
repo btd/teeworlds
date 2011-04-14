@@ -8,9 +8,11 @@
 
 #include "snapshot.h"
 
+class IConsole;
+
 class CDemoRecorder : public IDemoRecorder
 {
-	class IConsole *m_pConsole;
+	boost::shared_ptr < IConsole > m_pConsole;
 	IOHANDLE m_File;
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
@@ -23,7 +25,7 @@ class CDemoRecorder : public IDemoRecorder
 public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta);
 	
-	int Start(class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType);
+	int Start(const char *pFilename, const char *pNetversion, const char *pMap, unsigned MapCrc, const char *pType);
 
 	int Stop();
 
@@ -81,7 +83,7 @@ private:
 		CKeyFrameSearch *m_pNext;
 	};
 
-	class IConsole *m_pConsole;
+	boost::shared_ptr < IConsole > m_pConsole;
 	IOHANDLE m_File;
 	char m_aFilename[256];
 	CKeyFrame *m_pKeyFrames;
@@ -103,7 +105,7 @@ public:
 
 	void SetListner(IListner *pListner);
 
-	int Load(class IConsole *pConsole, const char *pFilename, int StorageType);
+	int Load(const char *pFilename, int StorageType);
 
 	int Play();
 	void Pause();

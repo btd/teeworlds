@@ -44,8 +44,9 @@ void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr)
 	m_Strings.add(s);
 }
 
-bool CLocalizationDatabase::Load(const char *pFilename, boost::shared_ptr<IStorage> pStorage, IConsole *pConsole)
+bool CLocalizationDatabase::Load(const char *pFilename)
 {
+    boost::shared_ptr<IConsole> pConsole = IConsole::instance();
 	// empty string means unload
 	if(pFilename[0] == 0)
 	{
@@ -54,7 +55,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, boost::shared_ptr<IStora
 		return true;
 	}
 
-	IOHANDLE IoHandle = pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE IoHandle = IStorage::instance()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!IoHandle)
 		return false;
 

@@ -5,10 +5,12 @@
 
 #include "kernel.h"
 
-class IConsole : public IInterface
-{
-	MACRO_INTERFACE("console", 0)
+class IConsole {
+  	static boost::shared_ptr< IConsole > g_instance;
+	static bool g_inited;
 public:
+    static boost::shared_ptr< IConsole > instance();
+    static void set(IConsole * pConsole);
 
 	enum
 	{

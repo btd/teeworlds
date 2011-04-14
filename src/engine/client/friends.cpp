@@ -31,7 +31,7 @@ void CFriends::Init()
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 
-	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
+	boost::shared_ptr < IConsole > pConsole = IConsole::instance();
 	if(pConsole)
 	{
 		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");

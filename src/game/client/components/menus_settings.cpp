@@ -820,9 +820,10 @@ public:
 	bool operator<(const CLanguage &Other) { return m_Name < Other.m_Name; }
 };
 
-void LoadLanguageIndexfile(boost::shared_ptr< IStorage > pStorage, IConsole *pConsole, sorted_array<CLanguage> *pLanguages)
+void LoadLanguageIndexfile(sorted_array<CLanguage> *pLanguages)
 {
-	IOHANDLE File = pStorage->OpenFile("languages/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+    boost::shared_ptr< IConsole> pConsole = IConsole::instance();
+	IOHANDLE File = IStorage::instance()->OpenFile("languages/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)
 	{
 		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "couldn't open index file");
@@ -871,7 +872,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 	if(s_Languages.size() == 0)
 	{
 		s_Languages.add(CLanguage("English", ""));
-		LoadLanguageIndexfile(Storage(), Console(), &s_Languages);
+		LoadLanguageIndexfile(&s_Languages);
 		for(int i = 0; i < s_Languages.size(); i++)
 			if(s_Languages[i].m_FileName.compare(g_Config.m_ClLanguagefile) == 0)
 			{
@@ -897,7 +898,7 @@ void CMenus::RenderLanguageSelection(CUIRect MainView)
 	if(OldSelected != s_SelectedLanguage)
 	{
 	    s_Languages[s_SelectedLanguage].m_FileName = g_Config.m_ClLanguagefile;
-		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
+		g_Localization.Load(s_Languages[s_SelectedLanguage].m_FileName.c_str());
 	}
 }
 
