@@ -16,7 +16,7 @@ class CLocalizationDatabase
 	{
 	public:
 		unsigned m_Hash;
-		
+
 		// TODO: do this as an const char * and put everything on a incremental heap
 		string m_Replacement;
 
@@ -28,14 +28,14 @@ class CLocalizationDatabase
 	sorted_array<CString> m_Strings;
 	int m_VersionCounter;
 	int m_CurrentVersion;
-	
+
 public:
 	CLocalizationDatabase();
 
 	bool Load(const char *pFilename, boost::shared_ptr<IStorage> pStorage, class IConsole *pConsole);
 
 	int Version() { return m_CurrentVersion; }
-	
+
 	void AddString(const char *pOrgStr, const char *pNewStr);
 	const char *FindString(unsigned Hash);
 };
@@ -51,7 +51,7 @@ class CLocConstString
 public:
 	CLocConstString(const char *pStr);
 	void Reload();
-	
+
 	inline operator const char *()
 	{
 		if(m_Version != g_Localization.Version())

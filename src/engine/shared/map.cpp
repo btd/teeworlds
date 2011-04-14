@@ -11,7 +11,7 @@ class CMap : public IEngineMap
 {
 	CDataFileReader m_DataFile;
 public:
-	
+
 	virtual void *GetData(int Index) { return m_DataFile.GetData(Index); }
 	virtual void *GetDataSwapped(int Index) { return m_DataFile.GetDataSwapped(Index); }
 	virtual void UnloadData(int Index) { m_DataFile.UnloadData(Index); }
@@ -19,7 +19,7 @@ public:
 	virtual void GetType(int Type, int *pStart, int *pNum) { m_DataFile.GetType(Type, pStart, pNum); }
 	virtual void *FindItem(int Type, int ID) { return m_DataFile.FindItem(Type, ID); }
 	virtual int NumItems() { return m_DataFile.NumItems(); }
-	
+
 	virtual void Unload()
 	{
 		m_DataFile.Close();
@@ -27,26 +27,22 @@ public:
 
 	virtual bool Load(const char *pMapName)
 	{
-		return m_DataFile.Open(IStorage::instance(), pMapName, IStorage::TYPE_ALL);
+		return m_DataFile.Open(pMapName, IStorage::TYPE_ALL);
 	}
-	
+
 	virtual bool IsLoaded()
 	{
 		return m_DataFile.IsOpen();
 	}
-	
+
 	virtual unsigned Crc()
 	{
 		return m_DataFile.Crc();
 	}
 };
 
-template<  >
-IEngineMap * create< IEngineMap >() { return new CMap; }
 
-
-
-boost::shared_ptr< IEngineMap > IEngineMap::g_instance(create< IEngineMap >());
+boost::shared_ptr< IEngineMap > IEngineMap::g_instance(new CMap);
 
 boost::shared_ptr< IEngineMap > IEngineMap::instance() {
     return g_instance;

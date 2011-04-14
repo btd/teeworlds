@@ -119,8 +119,8 @@ if gen_network_header:
 			print(line)
 		print("")
 
-	EmitEnum(["SOUND_%s" % i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
-	EmitEnum(["WEAPON_%s" % i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
+	EmitEnum(["SOUND_%s"%i.name.value.upper() for i in content.container.sounds.items], "NUM_SOUNDS")
+	EmitEnum(["WEAPON_%s"%i.name.value.upper() for i in content.container.weapons.id.items], "NUM_WEAPONS")
 
 	print("""
 
@@ -269,7 +269,7 @@ if gen_network_source:
 	lines += ['};']
 	lines += ['']
 
-#int Validate(int Type, void *pData, int Size);	
+ #int Validate(int Type, void *pData, int Size);
 
 	if 0:
 		for item in network.Messages:

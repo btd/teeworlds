@@ -19,13 +19,14 @@ public:
 		char m_aHostname[128];
 		NETADDR m_Addr;
 		bool m_Valid;
-		
+
 		CHostLookup m_Lookup;
 	} ;
 
 	CMasterInfo m_aMasterServers[MAX_MASTERSERVERS];
 	int m_NeedsUpdate;
 	IEngine *m_pEngine;
+
 	boost::shared_ptr < IStorage > m_pStorage;
 	
 	CMasterServer()
@@ -38,10 +39,10 @@ public:
 	virtual int RefreshAddresses(int Nettype)
 	{
 		int i;
-		
+
 		if(m_NeedsUpdate != -1)
 			return 0;
-		
+
 		dbg_msg("engine/mastersrv", "refreshing master server addresses");
 
 		// add lookup jobs
@@ -50,7 +51,7 @@ public:
 			m_pEngine->HostLookup(&m_aMasterServers[i].m_Lookup, m_aMasterServers[i].m_aHostname, Nettype);
 			m_aMasterServers[i].m_Valid = false;
 		}
-		
+
 		m_NeedsUpdate = 1;
 		return 0;
 	}
@@ -61,7 +62,7 @@ public:
 		if(m_NeedsUpdate != 1)
 			return;
 		m_NeedsUpdate = 0;
-		
+
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 		{
 			if(m_aMasterServers[i].m_Lookup.m_Job.Status() != CJob::STATE_DONE)
@@ -78,7 +79,7 @@ public:
 					m_aMasterServers[i].m_Valid = false;
 			}
 		}
-		
+
 		if(!m_NeedsUpdate)
 		{
 			dbg_msg("engine/mastersrv", "saving addresses");
@@ -91,12 +92,12 @@ public:
 		return m_NeedsUpdate;
 	}
 
-	virtual NETADDR GetAddr(int Index) 
+	virtual NETADDR GetAddr(int Index)
 	{
 		return m_aMasterServers[Index].m_Addr;
 	}
 
-	virtual const char *GetName(int Index) 
+	virtual const char *GetName(int Index)
 	{
 		return m_aMasterServers[Index].m_aHostname;
 	}
@@ -136,12 +137,12 @@ public:
 		int Count = 0;
 		if(!m_pStorage)
 			return -1;
-		
+
 		// try to open file
 		File = m_pStorage->OpenFile("masters.cfg", IOFLAG_READ, IStorage::TYPE_SAVE);
 		if(!File)
 			return -1;
-		
+
 		LineReader.Init(File);
 		while(1)
 		{
@@ -166,7 +167,7 @@ public:
 			//else
 			//	dbg_msg("engine/mastersrv", "warning: couldn't parse master server '%s'", pLine);
 		}
-		
+
 		io_close(File);
 		return 0;
 	}
@@ -177,7 +178,7 @@ public:
 
 		if(!m_pStorage)
 			return -1;
-			
+
 		// try to open file
 		File = m_pStorage->OpenFile("masters.cfg", IOFLAG_WRITE, IStorage::TYPE_SAVE);
 		if(!File)
@@ -189,10 +190,10 @@ public:
 			net_addr_str(&m_aMasterServers[i].m_Addr, aAddrStr, sizeof(aAddrStr));
 			char aBuf[1024];
 			str_format(aBuf, sizeof(aBuf), "%s %s\n", m_aMasterServers[i].m_aHostname, aAddrStr);
-				
+
 			io_write(File, aBuf, str_length(aBuf));
 		}
-		
+
 		io_close(File);
 		return 0;
 	}

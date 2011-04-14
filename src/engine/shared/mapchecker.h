@@ -19,7 +19,7 @@ class CMapChecker
 		unsigned m_MapSize;
 		CWhitelistEntry *m_pNext;
 	};
-	
+
 	class CHeap m_Whitelist;
 	CWhitelistEntry *m_pFirst;
 
@@ -32,7 +32,7 @@ public:
 	CMapChecker();
 	void AddMaplist(class CMapVersion *pMaplist, int Num);
 	bool IsMapValid(const char *pMapName, unsigned MapCrc, unsigned MapSize);
-	bool ReadAndValidateMap(boost::shared_ptr < IStorage > pStorage, const char *pFilename, int StorageType);
+	bool ReadAndValidateMap(const char *pFilename, int StorageType);
 };
 
 #endif
