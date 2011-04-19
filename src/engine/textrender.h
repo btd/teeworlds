@@ -30,9 +30,9 @@ public:
 	float m_FontSize;
 };
 
-class ITextRender : public IInterface
+class ITextRender
 {
-	MACRO_INTERFACE("textrender", 0)
+
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
 
@@ -54,7 +54,7 @@ public:
 
 class IEngineTextRender : public ITextRender
 {
-	MACRO_INTERFACE("enginetextrender", 0)
+	SINGLETON_DEFAULT_DEF (IEngineTextRender) 
 public:
 	virtual void Init() = 0;
 };

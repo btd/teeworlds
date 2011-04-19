@@ -22,8 +22,8 @@ void CDebugHud::RenderNetCorrections()
 	if(!g_Config.m_Debug || g_Config.m_DbgGraphs || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
 		return;
 
-	float Width = 300*Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0, 0, Width, 300);
+	float Width = 300*IEngineGraphics::instance()->ScreenAspect();
+	IEngineGraphics::instance()->MapScreen(0, 0, Width, 300);
 
 	/*float speed = distance(vec2(netobjects.local_prev_character->x, netobjects.local_prev_character->y),
 		vec2(netobjects.local_character->x, netobjects.local_character->y));*/
@@ -38,36 +38,36 @@ void CDebugHud::RenderNetCorrections()
 
 	float x = Width-100.0f, y = 50.0f;
 	for(int i = 0; i < Num; ++i)
-		TextRender()->Text(0, x, y+i*LineHeight, Fontsize, paStrings[i], -1);
+		IEngineTextRender::instance()->Text(0, x, y+i*LineHeight, Fontsize, paStrings[i], -1);
 
 	x = Width-10.0f;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed);
-	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	float w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.0f", Velspeed*Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_X);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Y);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += 2*LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1);
-	TextRender()->Text(0, x-w, y, Fontsize, aBuf, -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, aBuf, -1);
 	y += LineHeight;
-	w = TextRender()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
-	TextRender()->Text(0, x-w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
+	w = IEngineTextRender::instance()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
+	IEngineTextRender::instance()->Text(0, x-w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1);
 }
 
 void CDebugHud::RenderTuning()
@@ -78,7 +78,7 @@ void CDebugHud::RenderTuning()
 
 	CTuningParams StandardTuning;
 
-	Graphics()->MapScreen(0, 0, 300*Graphics()->ScreenAspect(), 300);
+	IEngineGraphics::instance()->MapScreen(0, 0, 300*IEngineGraphics::instance()->ScreenAspect(), 300);
 
 	float y = 50.0f;
 	int Count = 0;
@@ -90,34 +90,34 @@ void CDebugHud::RenderTuning()
 		StandardTuning.Get(i, &Standard);
 
 		if(Standard == Current)
-			TextRender()->TextColor(1,1,1,1.0f);
+			IEngineTextRender::instance()->TextColor(1,1,1,1.0f);
 		else
-			TextRender()->TextColor(1,0.25f,0.25f,1.0f);
+			IEngineTextRender::instance()->TextColor(1,0.25f,0.25f,1.0f);
 
 		float w;
 		float x = 5.0f;
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Standard);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1);
-		TextRender()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
+		w = IEngineTextRender::instance()->TextWidth(0, 5, aBuf, -1);
+		IEngineTextRender::instance()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Current);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1);
-		TextRender()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
+		w = IEngineTextRender::instance()->TextWidth(0, 5, aBuf, -1);
+		IEngineTextRender::instance()->Text(0x0, x-w, y+Count*6, 5, aBuf, -1);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y+Count*6, 5, m_pClient->m_Tuning.m_apNames[i], -1);
+		IEngineTextRender::instance()->Text(0x0, x, y+Count*6, 5, m_pClient->m_Tuning.m_apNames[i], -1);
 
 		Count++;
 	}
 
 	y = y+Count*6;
 
-	Graphics()->TextureSet(-1);
-	Graphics()->BlendNormal();
-	Graphics()->LinesBegin();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->LinesBegin();
 	float Height = 50.0f;
 	float pv = 1;
 	IGraphics::CLineItem Array[100];
@@ -127,12 +127,12 @@ void CDebugHud::RenderTuning()
 		float Ramp = VelocityRamp(Speed, m_pClient->m_Tuning.m_VelrampStart, m_pClient->m_Tuning.m_VelrampRange, m_pClient->m_Tuning.m_VelrampCurvature);
 		float RampedSpeed = (Speed * Ramp)/1000.0f;
 		Array[i] = IGraphics::CLineItem((i-1)*2, y+Height-pv*Height, i*2, y+Height-RampedSpeed*Height);
-		//Graphics()->LinesDraw((i-1)*2, 200, i*2, 200);
+		//IEngineGraphics::instance()->LinesDraw((i-1)*2, 200, i*2, 200);
 		pv = RampedSpeed;
 	}
-	Graphics()->LinesDraw(Array, 100);
-	Graphics()->LinesEnd();
-	TextRender()->TextColor(1,1,1,1);
+	IEngineGraphics::instance()->LinesDraw(Array, 100);
+	IEngineGraphics::instance()->LinesEnd();
+	IEngineTextRender::instance()->TextColor(1,1,1,1);
 }
 
 void CDebugHud::OnRender()

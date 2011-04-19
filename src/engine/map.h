@@ -28,11 +28,9 @@ public:
 
 class IEngineMap : public IMap
 {
-    static boost::shared_ptr< IEngineMap > g_instance;
-	
+    SINGLETON_DEFAULT_DEF(IEngineMap)
 
 public:
-    static boost::shared_ptr< IEngineMap > instance();
     
 	virtual bool Load(const char *pMapName) = 0;
 	virtual bool IsLoaded() = 0;

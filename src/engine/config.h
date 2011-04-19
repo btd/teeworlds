@@ -5,9 +5,9 @@
 
 #include "kernel.h"
 
-class IConfig : public IInterface
+class IConfig 
 {
-	MACRO_INTERFACE("config", 0)
+	SINGLETON_DEFAULT_DEF (IConfig) 
 public:
 	typedef void (*SAVECALLBACKFUNC)(IConfig *pConfig, void *pUserData);
 

@@ -44,7 +44,6 @@ CInput::CInput()
 
 void CInput::Init()
 {
-	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	SDL_EnableUNICODE(1);
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 }
@@ -61,8 +60,8 @@ void CInput::MouseRelative(float *x, float *y)
 		if(m_InputGrabbed)
 		{
 			SDL_GetMouseState(&nx,&ny);
-			SDL_WarpMouse(Graphics()->ScreenWidth()/2,Graphics()->ScreenHeight()/2);
-			nx -= Graphics()->ScreenWidth()/2; ny -= Graphics()->ScreenHeight()/2;
+			SDL_WarpMouse(IEngineGraphics::instance()->ScreenWidth()/2,IEngineGraphics::instance()->ScreenHeight()/2);
+			nx -= IEngineGraphics::instance()->ScreenWidth()/2; ny -= IEngineGraphics::instance()->ScreenHeight()/2;
 		}
 	}
 
@@ -110,10 +109,10 @@ int CInput::KeyState(int Key)
 
 int CInput::Update()
 {
-	if(m_InputGrabbed && !Graphics()->WindowActive())
+	if(m_InputGrabbed && !IEngineGraphics::instance()->WindowActive())
 		MouseModeAbsolute();
 
-	/*if(!input_grabbed && Graphics()->WindowActive())
+	/*if(!input_grabbed && IEngineGraphics::instance()->WindowActive())
 		Input()->MouseModeRelative();*/
 
 	// clear and begin count on the other one

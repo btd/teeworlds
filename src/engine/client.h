@@ -6,9 +6,9 @@
 
 #include "message.h"
 
-class IClient : public IInterface
+class IClient
 {
-	MACRO_INTERFACE("client", 0)
+	SINGLETON_DEFAULT_DEF (IClient) 
 protected:
 	// quick access to state of the client
 	int m_State;
@@ -137,11 +137,11 @@ public:
 	virtual int GetDebugFont() = 0;
 };
 
-class IGameClient : public IInterface
+class IGameClient 
 {
-	MACRO_INTERFACE("gameclient", 0)
-protected:
+	SINGLETON_DEFAULT_DEF (IGameClient) 
 public:
+
 	virtual void OnConsoleInit() = 0;
 
 	virtual void OnRconLine(const char *pLine) = 0;

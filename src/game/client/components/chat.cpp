@@ -6,6 +6,7 @@
 #include <engine/textrender.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/console.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/client_data.h>
@@ -17,6 +18,7 @@
 #include <game/localization.h>
 
 #include "chat.h"
+
 
 
 CChat::CChat()
@@ -77,7 +79,7 @@ void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
 	else if(str_comp(pMode, "team") == 0)
 		((CChat*)pUserData)->EnableMode(1);
 	else
-		((CChat*)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
 }
 
 void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
@@ -87,10 +89,10 @@ void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
 
 void CChat::OnConsoleInit()
 {
-	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
-	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
-	Console()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
-	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
+	IConsole::instance()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
+	IConsole::instance()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
+	IConsole::instance()->Register("chat", "s", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
+	IConsole::instance()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 }
 
 bool CChat::OnInput(IInput::CEvent Event)
@@ -211,7 +213,7 @@ bool CChat::OnInput(IInput::CEvent Event)
 
 void CChat::EnableMode(int Team)
 {
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	if(m_Mode == MODE_NONE)
@@ -222,7 +224,7 @@ void CChat::EnableMode(int Team)
 			m_Mode = MODE_ALL;
 
 		m_Input.Clear();
-		Input()->ClearEvents();
+		IEngineInput::instance()->ClearEvents();
 		m_CompletionChosen = -1;
 	}
 }
@@ -292,7 +294,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", aBuf);
 	}
 
 	// play sound
@@ -306,26 +308,26 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 void CChat::OnRender()
 {
-	float Width = 300.0f*Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, 300.0f);
+	float Width = 300.0f*IEngineGraphics::instance()->ScreenAspect();
+	IEngineGraphics::instance()->MapScreen(0.0f, 0.0f, Width, 300.0f);
 	float x = 5.0f;
 	float y = 300.0f-20.0f;
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
+		IEngineTextRender::instance()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Width-190.0f;
 		Cursor.m_MaxLines = 2;
 
 		if(m_Mode == MODE_ALL)
-			TextRender()->TextEx(&Cursor, Localize("All"), -1);
+			IEngineTextRender::instance()->TextEx(&Cursor, Localize("All"), -1);
 		else if(m_Mode == MODE_TEAM)
-			TextRender()->TextEx(&Cursor, Localize("Team"), -1);
+			IEngineTextRender::instance()->TextEx(&Cursor, Localize("Team"), -1);
 		else
-			TextRender()->TextEx(&Cursor, Localize("Chat"), -1);
+			IEngineTextRender::instance()->TextEx(&Cursor, Localize("Chat"), -1);
 
-		TextRender()->TextEx(&Cursor, ": ", -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, ": ", -1);
 
 		// check if the visible text has to be moved
 		if(m_InputUpdate)
@@ -339,24 +341,24 @@ void CChat::OnRender()
 			{
 				CTextCursor Temp = Cursor;
 				Temp.m_Flags = 0;
-				TextRender()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
-				TextRender()->TextEx(&Temp, "|", -1);
+				IEngineTextRender::instance()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+				IEngineTextRender::instance()->TextEx(&Temp, "|", -1);
 				while(Temp.m_LineCount > 2)
 				{
 					++m_ChatStringOffset;
 					Temp = Cursor;
 					Temp.m_Flags = 0;
-					TextRender()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
-					TextRender()->TextEx(&Temp, "|", -1);
+					IEngineTextRender::instance()->TextEx(&Temp, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+					IEngineTextRender::instance()->TextEx(&Temp, "|", -1);
 				}
 			}
 			m_InputUpdate = false;
 		}
 
-		TextRender()->TextEx(&Cursor, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_Input.GetString()+m_ChatStringOffset, m_Input.GetCursorOffset()-m_ChatStringOffset);
 		CTextCursor Marker = Cursor;
-		TextRender()->TextEx(&Marker, "|", -1);
-		TextRender()->TextEx(&Cursor, m_Input.GetString()+m_Input.GetCursorOffset(), -1);
+		IEngineTextRender::instance()->TextEx(&Marker, "|", -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_Input.GetString()+m_Input.GetCursorOffset(), -1);
 	}
 
 	y -= 8.0f;
@@ -377,10 +379,10 @@ void CChat::OnRender()
 		// get the y offset (calculate it if we haven't done that yet)
 		if(m_aLines[r].m_YOffset[OffsetType] < 0.0f)
 		{
-			TextRender()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
+			IEngineTextRender::instance()->SetCursor(&Cursor, Begin, 0.0f, FontSize, 0);
 			Cursor.m_LineWidth = LineWidth;
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
-			TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+			IEngineTextRender::instance()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+			IEngineTextRender::instance()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 			m_aLines[r].m_YOffset[OffsetType] = Cursor.m_Y + Cursor.m_FontSize;
 		}
 		y -= m_aLines[r].m_YOffset[OffsetType];
@@ -392,39 +394,39 @@ void CChat::OnRender()
 		float Blend = Now > m_aLines[r].m_Time+14*time_freq() && !m_Show ? 1.0f-(Now-m_aLines[r].m_Time-14*time_freq())/(2.0f*time_freq()) : 1.0f;
 
 		// reset the cursor
-		TextRender()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
+		IEngineTextRender::instance()->SetCursor(&Cursor, Begin, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 
 		// render name
 		if(m_aLines[r].m_ClientID == -1)
-			TextRender()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
+			IEngineTextRender::instance()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
 		else if(m_aLines[r].m_Team)
-			TextRender()->TextColor(0.45f, 0.9f, 0.45f, Blend); // team message
+			IEngineTextRender::instance()->TextColor(0.45f, 0.9f, 0.45f, Blend); // team message
 		else if(m_aLines[r].m_NameColor == TEAM_RED)
-			TextRender()->TextColor(1.0f, 0.5f, 0.5f, Blend); // red
+			IEngineTextRender::instance()->TextColor(1.0f, 0.5f, 0.5f, Blend); // red
 		else if(m_aLines[r].m_NameColor == TEAM_BLUE)
-			TextRender()->TextColor(0.7f, 0.7f, 1.0f, Blend); // blue
+			IEngineTextRender::instance()->TextColor(0.7f, 0.7f, 1.0f, Blend); // blue
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
-			TextRender()->TextColor(0.75f, 0.5f, 0.75f, Blend); // spectator
+			IEngineTextRender::instance()->TextColor(0.75f, 0.5f, 0.75f, Blend); // spectator
 		else
-			TextRender()->TextColor(0.8f, 0.8f, 0.8f, Blend);
+			IEngineTextRender::instance()->TextColor(0.8f, 0.8f, 0.8f, Blend);
 
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_aLines[r].m_aName, -1);
 
 		// render line
 		if(m_aLines[r].m_ClientID == -1)
-			TextRender()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
+			IEngineTextRender::instance()->TextColor(1.0f, 1.0f, 0.5f, Blend); // system
 		else if(m_aLines[r].m_Highlighted)
-			TextRender()->TextColor(1.0f, 0.5f, 0.5f, Blend); // highlighted
+			IEngineTextRender::instance()->TextColor(1.0f, 0.5f, 0.5f, Blend); // highlighted
 		else if(m_aLines[r].m_Team)
-			TextRender()->TextColor(0.65f, 1.0f, 0.65f, Blend); // team message
+			IEngineTextRender::instance()->TextColor(0.65f, 1.0f, 0.65f, Blend); // team message
 		else
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Blend);
+			IEngineTextRender::instance()->TextColor(1.0f, 1.0f, 1.0f, Blend);
 
-		TextRender()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_aLines[r].m_aText, -1);
 	}
 
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	IEngineTextRender::instance()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void CChat::Say(int Team, const char *pLine)
@@ -433,5 +435,5 @@ void CChat::Say(int Team, const char *pLine)
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	IClient::instance()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 }

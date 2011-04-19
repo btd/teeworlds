@@ -80,7 +80,7 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, void (*pfnEval)(float TimeOffset, int Env, float *pChannels, void *pUser), void *pUser)
 {
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->QuadsBegin();
 	float Conv = 1/255.0f;
 	for(int i = 0; i < NumQuads; i++)
 	{
@@ -107,7 +107,7 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, voi
 		if(!Opaque && !(RenderFlags&LAYERRENDERFLAG_TRANSPARENT))
 			continue;
 
-		Graphics()->QuadsSetSubsetFree(
+		IEngineGraphics::instance()->QuadsSetSubsetFree(
 			fx2f(q->m_aTexcoords[0].x), fx2f(q->m_aTexcoords[0].y),
 			fx2f(q->m_aTexcoords[1].x), fx2f(q->m_aTexcoords[1].y),
 			fx2f(q->m_aTexcoords[2].x), fx2f(q->m_aTexcoords[2].y),
@@ -133,7 +133,7 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, voi
 			IGraphics::CColorVertex(1, q->m_aColors[1].r*Conv*r, q->m_aColors[1].g*Conv*g, q->m_aColors[1].b*Conv*b, q->m_aColors[1].a*Conv*a),
 			IGraphics::CColorVertex(2, q->m_aColors[2].r*Conv*r, q->m_aColors[2].g*Conv*g, q->m_aColors[2].b*Conv*b, q->m_aColors[2].a*Conv*a),
 			IGraphics::CColorVertex(3, q->m_aColors[3].r*Conv*r, q->m_aColors[3].g*Conv*g, q->m_aColors[3].b*Conv*b, q->m_aColors[3].a*Conv*a)};
-		Graphics()->SetColorVertex(Array, 4);
+		IEngineGraphics::instance()->SetColorVertex(Array, 4);
 
 		CPoint *pPoints = q->m_aPoints;
 
@@ -157,25 +157,25 @@ void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, voi
 			fx2f(pPoints[1].x)+OffsetX, fx2f(pPoints[1].y)+OffsetY,
 			fx2f(pPoints[2].x)+OffsetX, fx2f(pPoints[2].y)+OffsetY,
 			fx2f(pPoints[3].x)+OffsetX, fx2f(pPoints[3].y)+OffsetY);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+		IEngineGraphics::instance()->QuadsDrawFreeform(&Freeform, 1);
 	}
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 }
 
 void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 Color, int RenderFlags)
 {
-	//Graphics()->TextureSet(img_get(tmap->image));
+	//IEngineGraphics::instance()->TextureSet(img_get(tmap->image));
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	//Graphics()->MapScreen(screen_x0-50, screen_y0-50, screen_x1+50, screen_y1+50);
+	IEngineGraphics::instance()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	//IEngineGraphics::instance()->MapScreen(screen_x0-50, screen_y0-50, screen_x1+50, screen_y1+50);
 
 	// calculate the final pixelsize for the tiles
 	float TilePixelSize = 1024/32.0f;
-	float FinalTileSize = Scale/(ScreenX1-ScreenX0) * Graphics()->ScreenWidth();
+	float FinalTileSize = Scale/(ScreenX1-ScreenX0) * IEngineGraphics::instance()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize/TilePixelSize;
 
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(Color.r, Color.g, Color.b, Color.a);
 
 	int StartY = (int)(ScreenY0/Scale)-1;
 	int StartX = (int)(ScreenX0/Scale)-1;
@@ -284,14 +284,14 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, vec4 
 						y1 = Tmp;
  					}
 
-					Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
+					IEngineGraphics::instance()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
 					IGraphics::CQuadItem QuadItem(x*Scale, y*Scale, Scale, Scale);
-					Graphics()->QuadsDrawTL(&QuadItem, 1);
+					IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 				}
 			}
 			x += pTiles[c].m_Skip;
 		}
 
-	Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	IEngineGraphics::instance()->QuadsEnd();
+	IEngineGraphics::instance()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }

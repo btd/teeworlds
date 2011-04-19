@@ -11,6 +11,7 @@
 #include "render.h"
 
 class IStorage;
+class IInput;
 
 class CGameClient : public IGameClient
 {
@@ -33,20 +34,6 @@ class CGameClient : public IGameClient
 	CStack m_Input;
 	CNetObjHandler m_NetObjHandler;
 
-	class IEngine *m_pEngine;
-	class IInput *m_pInput;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	class IClient *m_pClient;
-	class ISound *m_pSound;
-	boost::shared_ptr<IConsole> m_pConsole;
-	boost::shared_ptr<IStorage> m_pStorage;
-	class IDemoPlayer *m_pDemoPlayer;
-	class IDemoRecorder *m_pDemoRecorder;
-	class IServerBrowser *m_pServerBrowser;
-	class IEditor *m_pEditor;
-	class IFriends *m_pFriends;
-
 	CLayers m_Layers;
 	class CCollision m_Collision;
 	CUI m_UI;
@@ -66,24 +53,11 @@ class CGameClient : public IGameClient
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
-	IKernel *Kernel() { return IInterface::Kernel(); }
-	IEngine *Engine() const { return m_pEngine; }
-	class IGraphics *Graphics() const { return m_pGraphics; }
-	class IClient *Client() const { return m_pClient; }
-	class CUI *UI() { return &m_UI; }
-	class ISound *Sound() const { return m_pSound; }
-	class IInput *Input() const { return m_pInput; }
-	boost::shared_ptr<IStorage> Storage() const { return m_pStorage; }
-	boost::shared_ptr<IConsole> Console() { return m_pConsole; }
-	class ITextRender *TextRender() const { return m_pTextRender; }
-	class IDemoPlayer *DemoPlayer() const { return m_pDemoPlayer; }
-	class IDemoRecorder *DemoRecorder() const { return m_pDemoRecorder; }
-	class IServerBrowser *ServerBrowser() const { return m_pServerBrowser; }
-	class CRenderTools *RenderTools() { return &m_RenderTools; }
-	class CLayers *Layers() { return &m_Layers; };
-	class CCollision *Collision() { return &m_Collision; };
-	class IEditor *Editor() { return m_pEditor; }
-	class IFriends *Friends() { return m_pFriends; }
+	
+    CUI *UI() { return &m_UI; }
+	CRenderTools * RenderTools() { return &m_RenderTools; }
+	CLayers * Layers() { return &m_Layers; };
+	CCollision * Collision() { return &m_Collision; };
 
 	int NetobjNumCorrections() { return m_NetObjHandler.NumObjCorrections(); }
 	const char *NetobjCorrectedOn() { return m_NetObjHandler.CorrectedObjOn(); }

@@ -4,9 +4,9 @@
 #define ENGINE_EDITOR_H
 #include "kernel.h"
 
-class IEditor : public IInterface
+class IEditor
 {
-	MACRO_INTERFACE("editor", 0)
+	SINGLETON_DEFAULT_DEF (IEditor) 
 public:
 
 	virtual ~IEditor() {}

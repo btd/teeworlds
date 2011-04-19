@@ -6,11 +6,9 @@
 #include "kernel.h"
 
 class IConsole {
-  	static boost::shared_ptr< IConsole > g_instance;
-	static bool g_inited;
+    SINGLETON_DEFAULT_DEF(IConsole)
+	SINGLETON_SET_DEF(IConsole)
 public:
-    static boost::shared_ptr< IConsole > instance();
-    static void set(IConsole * pConsole);
 
 	enum
 	{

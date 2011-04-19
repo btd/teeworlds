@@ -48,9 +48,9 @@ public:
 	CClient m_aClients[MAX_CLIENTS];
 };
 
-class IServerBrowser : public IInterface
+class IServerBrowser 
 {
-	MACRO_INTERFACE("serverbrowser", 0)
+	SINGLETON_DEFAULT_DEF(IServerBrowser)
 public:
 
 	/* Constants: Server Browser Sorting

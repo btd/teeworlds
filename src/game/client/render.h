@@ -42,12 +42,12 @@ enum
 
 class CRenderTools
 {
+    CUI *m_pUI;
 public:
-	class IGraphics *m_pGraphics;
-	class CUI *m_pUI;
+    void setUI(CUI *);
+	
 
-	class IGraphics *Graphics() const { return m_pGraphics; }
-	class CUI *UI() const { return m_pUI; }
+	CUI *UI() const { return m_pUI; }
 
 	//typedef struct SPRITE;
 

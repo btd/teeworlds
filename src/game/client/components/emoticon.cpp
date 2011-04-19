@@ -18,7 +18,7 @@ CEmoticon::CEmoticon()
 void CEmoticon::ConKeyEmoticon(IConsole::IResult *pResult, void *pUserData)
 {
 	CEmoticon *pSelf = (CEmoticon *)pUserData;
-	if(!pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(!pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
@@ -29,8 +29,8 @@ void CEmoticon::ConEmote(IConsole::IResult *pResult, void *pUserData)
 
 void CEmoticon::OnConsoleInit()
 {
-	Console()->Register("+emote", "", CFGFLAG_CLIENT, ConKeyEmoticon, this, "Open emote selector");
-	Console()->Register("emote", "i", CFGFLAG_CLIENT, ConEmote, this, "Use emote");
+	IConsole::instance()->Register("+emote", "", CFGFLAG_CLIENT, ConKeyEmoticon, this, "Open emote selector");
+	IConsole::instance()->Register("emote", "i", CFGFLAG_CLIENT, ConEmote, this, "Use emote");
 }
 
 void CEmoticon::OnReset()
@@ -82,12 +82,12 @@ void CEmoticon::DrawCircle(float x, float y, float r, int Segments)
 			x+Ca2*r, y+Sa2*r);
 		if(NumItems == 32)
 		{
-			m_pClient->Graphics()->QuadsDrawFreeform(Array, 32);
+			IEngineGraphics::instance()->QuadsDrawFreeform(Array, 32);
 			NumItems = 0;
 		}
 	}
 	if(NumItems)
-		m_pClient->Graphics()->QuadsDrawFreeform(Array, NumItems);
+		IEngineGraphics::instance()->QuadsDrawFreeform(Array, NumItems);
 }
 
 
@@ -115,18 +115,18 @@ void CEmoticon::OnRender()
 
 	CUIRect Screen = *UI()->Screen();
 
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
-	Graphics()->BlendNormal();
+	IEngineGraphics::instance()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.3f);
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0,0,0,0.3f);
 	DrawCircle(Screen.w/2, Screen.h/2, 160, 64);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 
 	for (int i = 0; i < NUM_EMOTICONS; i++)
 	{
@@ -142,22 +142,22 @@ void CEmoticon::OnRender()
 		float NudgeY = 120 * sinf(Angle);
 		RenderTools()->SelectSprite(SPRITE_OOP + i);
 		IGraphics::CQuadItem QuadItem(Screen.w/2 + NudgeX, Screen.h/2 + NudgeY, Size, Size);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 	}
 
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(1,1,1,1);
 	IGraphics::CQuadItem QuadItem(m_SelectorMouse.x+Screen.w/2,m_SelectorMouse.y+Screen.h/2,24,24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 }
 
 void CEmoticon::Emote(int Emoticon)
 {
 	CNetMsg_Cl_Emoticon Msg;
 	Msg.m_Emoticon = Emoticon;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	IClient::instance()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 }

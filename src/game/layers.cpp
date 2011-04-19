@@ -14,7 +14,7 @@ CLayers::CLayers()
 
 void CLayers::Init()
 {
-	m_pMap = IEngineMap::instance();
+	boost::shared_ptr < IEngineMap > m_pMap = IEngineMap::instance();
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
@@ -57,10 +57,10 @@ void CLayers::Init()
 
 CMapItemGroup *CLayers::GetGroup(int Index) const
 {
-	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart+Index, 0, 0));
+	return static_cast<CMapItemGroup *>(IEngineMap::instance()->GetItem(m_GroupsStart+Index, 0, 0));
 }
 
 CMapItemLayer *CLayers::GetLayer(int Index) const
 {
-	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart+Index, 0, 0));
+	return static_cast<CMapItemLayer *>(IEngineMap::instance()->GetItem(m_LayersStart+Index, 0, 0));
 }

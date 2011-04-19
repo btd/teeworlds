@@ -5,9 +5,9 @@
 #include "kernel.h"
 #include "message.h"
 
-class IServer : public IInterface
+class IServer
 {
-	MACRO_INTERFACE("server", 0)
+	SINGLETON_DEFAULT_DEF(IServer)
 protected:
 	int m_CurrentGameTick;
 	int m_TickSpeed;
@@ -59,9 +59,9 @@ public:
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 };
 
-class IGameServer : public IInterface
+class IGameServer 
 {
-	MACRO_INTERFACE("gameserver", 0)
+	SINGLETON_DEFAULT_DEF(IGameServer)
 protected:
 public:
 	virtual void OnInit() = 0;

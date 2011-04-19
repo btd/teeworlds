@@ -45,10 +45,10 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 	HandPos += DirX * PostRotOffset.x;
 	HandPos += DirY * PostRotOffset.y;
 
-	//Graphics()->TextureSet(data->m_aImages[IMAGE_CHAR_DEFAULT].id);
-	Graphics()->TextureSet(pInfo->m_Texture);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
+	//IEngineGraphics::instance()->TextureSet(data->m_aImages[IMAGE_CHAR_DEFAULT].id);
+	IEngineGraphics::instance()->TextureSet(pInfo->m_Texture);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
 
 	// two passes
 	for (int i = 0; i < 2; i++)
@@ -56,13 +56,13 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 		bool OutLine = i == 0;
 
 		RenderTools()->SelectSprite(OutLine?SPRITE_TEE_HAND_OUTLINE:SPRITE_TEE_HAND, 0, 0, 0);
-		Graphics()->QuadsSetRotation(Angle);
+		IEngineGraphics::instance()->QuadsSetRotation(Angle);
 		IGraphics::CQuadItem QuadItem(HandPos.x, HandPos.y, 2*BaseSize, 2*BaseSize);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 	}
 
-	Graphics()->QuadsSetRotation(0);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsSetRotation(0);
+	IEngineGraphics::instance()->QuadsEnd();
 }
 
 inline float NormalizeAngular(float f)
@@ -120,14 +120,14 @@ void CPlayers::RenderHook(
 		}
 	}
 
-	float IntraTick = Client()->IntraGameTick();
+	float IntraTick = IClient::instance()->IntraGameTick();
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
 
 	// use preditect players if needed
-	if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(pInfo.m_Local && g_Config.m_ClPredict && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 		{
@@ -137,7 +137,7 @@ void CPlayers::RenderHook(
 			// apply predicted results
 			m_pClient->m_PredictedChar.Write(&Player);
 			m_pClient->m_PredictedPrevChar.Write(&Prev);
-			IntraTick = Client()->PredIntraGameTick();
+			IntraTick = IClient::instance()->PredIntraGameTick();
 		}
 	}
 
@@ -146,9 +146,9 @@ void CPlayers::RenderHook(
 	// draw hook
 	if (Prev.m_HookState>0 && Player.m_HookState>0)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		Graphics()->QuadsBegin();
-		//Graphics()->QuadsBegin();
+		IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		IEngineGraphics::instance()->QuadsBegin();
+		//IEngineGraphics::instance()->QuadsBegin();
 
 		vec2 Pos = Position;
 		vec2 HookPos;
@@ -157,11 +157,11 @@ void CPlayers::RenderHook(
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo && pPlayerChar->m_HookedPlayer == m_pClient->m_Snap.m_pLocalInfo->m_ClientID)
 			{
-				if(Client()->State() == IClient::STATE_DEMOPLAYBACK) // only use prediction if needed
+				if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK) // only use prediction if needed
 					HookPos = vec2(m_pClient->m_LocalCharacterPos.x, m_pClient->m_LocalCharacterPos.y);
 				else
 					HookPos = mix(vec2(m_pClient->m_PredictedPrevChar.m_Pos.x, m_pClient->m_PredictedPrevChar.m_Pos.y),
-						vec2(m_pClient->m_PredictedChar.m_Pos.x, m_pClient->m_PredictedChar.m_Pos.y), Client()->PredIntraGameTick());
+						vec2(m_pClient->m_PredictedChar.m_Pos.x, m_pClient->m_PredictedChar.m_Pos.y), IClient::instance()->PredIntraGameTick());
 			}
 			else if(pInfo.m_Local)
 			{
@@ -169,10 +169,10 @@ void CPlayers::RenderHook(
 					m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Prev.m_Y),
 					vec2(m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_X,
 					m_pClient->m_Snap.m_aCharacters[pPlayerChar->m_HookedPlayer].m_Cur.m_Y),
-					Client()->IntraGameTick());
+					IClient::instance()->IntraGameTick());
 			}
 			else
-				HookPos = mix(vec2(pPrevChar->m_HookX, pPrevChar->m_HookY), vec2(pPlayerChar->m_HookX, pPlayerChar->m_HookY), Client()->IntraGameTick());
+				HookPos = mix(vec2(pPrevChar->m_HookX, pPrevChar->m_HookY), vec2(pPlayerChar->m_HookX, pPlayerChar->m_HookY), IClient::instance()->IntraGameTick());
 		}
 		else
 			HookPos = mix(vec2(Prev.m_HookX, Prev.m_HookY), vec2(Player.m_HookX, Player.m_HookY), IntraTick);
@@ -180,12 +180,12 @@ void CPlayers::RenderHook(
 		float d = distance(Pos, HookPos);
 		vec2 Dir = normalize(Pos-HookPos);
 
-		Graphics()->QuadsSetRotation(GetAngle(Dir)+pi);
+		IEngineGraphics::instance()->QuadsSetRotation(GetAngle(Dir)+pi);
 
 		// render head
 		RenderTools()->SelectSprite(SPRITE_HOOK_HEAD);
 		IGraphics::CQuadItem QuadItem(HookPos.x, HookPos.y, 24,16);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 
 		// render chain
 		RenderTools()->SelectSprite(SPRITE_HOOK_CHAIN);
@@ -197,9 +197,9 @@ void CPlayers::RenderHook(
 			Array[i] = IGraphics::CQuadItem(p.x, p.y,24,16);
 		}
 
-		Graphics()->QuadsDraw(Array, i);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDraw(Array, i);
+		IEngineGraphics::instance()->QuadsSetRotation(0);
+		IEngineGraphics::instance()->QuadsEnd();
 
 		RenderHand(&RenderInfo, Position, normalize(HookPos-Pos), -pi/2, vec2(20, 0));
 	}
@@ -247,13 +247,13 @@ void CPlayers::RenderPlayer(
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
-	float IntraTick = Client()->IntraGameTick();
+	float IntraTick = IClient::instance()->IntraGameTick();
 
 	float Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, IntraTick)/256.0f;
 
 	//float angle = 0;
 
-	if(pInfo.m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(pInfo.m_Local && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's local player we are rendering
 		Angle = GetAngle(m_pClient->m_pControls->m_MousePos);
@@ -261,7 +261,7 @@ void CPlayers::RenderPlayer(
 	else
 	{
 		/*
-		float mixspeed = Client()->FrameTime()*2.5f;
+		float mixspeed = IClient::instance()->FrameTime()*2.5f;
 		if(player.attacktick != prev.attacktick) // shooting boosts the mixing speed
 			mixspeed *= 15.0f;
 
@@ -282,7 +282,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// use preditect players if needed
-	if(pInfo.m_Local && g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(pInfo.m_Local && g_Config.m_ClPredict && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		if(!m_pClient->m_Snap.m_pLocalCharacter || (m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_GAMEOVER))
 		{
@@ -292,7 +292,7 @@ void CPlayers::RenderPlayer(
 			// apply predicted results
 			m_pClient->m_PredictedChar.Write(&Player);
 			m_pClient->m_PredictedPrevChar.Write(&Prev);
-			IntraTick = Client()->PredIntraGameTick();
+			IntraTick = IClient::instance()->PredIntraGameTick();
 			NewTick = m_pClient->m_NewPredictedTick;
 		}
 	}
@@ -332,12 +332,12 @@ void CPlayers::RenderPlayer(
 
 	if (Player.m_Weapon == WEAPON_HAMMER)
 	{
-		float ct = (Client()->PrevGameTick()-Player.m_AttackTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
+		float ct = (IClient::instance()->PrevGameTick()-Player.m_AttackTick)/(float)SERVER_TICK_SPEED + IClient::instance()->GameTickTime();
 		State.Add(&g_pData->m_aAnimations[ANIM_HAMMER_SWING], clamp(ct*5.0f,0.0f,1.0f), 1.0f);
 	}
 	if (Player.m_Weapon == WEAPON_NINJA)
 	{
-		float ct = (Client()->PrevGameTick()-Player.m_AttackTick)/(float)SERVER_TICK_SPEED + Client()->GameTickTime();
+		float ct = (IClient::instance()->PrevGameTick()-Player.m_AttackTick)/(float)SERVER_TICK_SPEED + IClient::instance()->GameTickTime();
 		State.Add(&g_pData->m_aAnimations[ANIM_NINJA_SWING], clamp(ct*2.0f,0.0f,1.0f), 1.0f);
 	}
 
@@ -359,9 +359,9 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-		Graphics()->QuadsBegin();
-		Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle*pi*2+Angle);
+		IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+		IEngineGraphics::instance()->QuadsBegin();
+		IEngineGraphics::instance()->QuadsSetRotation(State.GetAttach()->m_Angle*pi*2+Angle);
 
 		// normal weapons
 		int iw = clamp(Player.m_Weapon, 0, NUM_WEAPONS-1);
@@ -378,12 +378,12 @@ void CPlayers::RenderPlayer(
 			// if attack is under way, bash stuffs
 			if(Direction.x < 0)
 			{
-				Graphics()->QuadsSetRotation(-pi/2-State.GetAttach()->m_Angle*pi*2);
+				IEngineGraphics::instance()->QuadsSetRotation(-pi/2-State.GetAttach()->m_Angle*pi*2);
 				p.x -= g_pData->m_Weapons.m_aId[iw].m_Offsetx;
 			}
 			else
 			{
-				Graphics()->QuadsSetRotation(-pi/2+State.GetAttach()->m_Angle*pi*2);
+				IEngineGraphics::instance()->QuadsSetRotation(-pi/2+State.GetAttach()->m_Angle*pi*2);
 			}
 			RenderTools()->DrawSprite(p.x, p.y, g_pData->m_Weapons.m_aId[iw].m_VisualSize);
 		}
@@ -394,25 +394,25 @@ void CPlayers::RenderPlayer(
 
 			if(Direction.x < 0)
 			{
-				Graphics()->QuadsSetRotation(-pi/2-State.GetAttach()->m_Angle*pi*2);
+				IEngineGraphics::instance()->QuadsSetRotation(-pi/2-State.GetAttach()->m_Angle*pi*2);
 				p.x -= g_pData->m_Weapons.m_aId[iw].m_Offsetx;
 				m_pClient->m_pEffects->PowerupShine(p+vec2(32,0), vec2(32,12));
 			}
 			else
 			{
-				Graphics()->QuadsSetRotation(-pi/2+State.GetAttach()->m_Angle*pi*2);
+				IEngineGraphics::instance()->QuadsSetRotation(-pi/2+State.GetAttach()->m_Angle*pi*2);
 				m_pClient->m_pEffects->PowerupShine(p-vec2(32,0), vec2(32,12));
 			}
 			RenderTools()->DrawSprite(p.x, p.y, g_pData->m_Weapons.m_aId[iw].m_VisualSize);
 
 			// HADOKEN
-			if ((Client()->GameTick()-Player.m_AttackTick) <= (SERVER_TICK_SPEED / 6) && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
+			if ((IClient::instance()->GameTick()-Player.m_AttackTick) <= (SERVER_TICK_SPEED / 6) && g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)
 			{
 				int IteX = rand() % g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles;
-				if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+				if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 				{
 					static int s_LastIteX = IteX;
-					const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+					const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 					if(pInfo->m_Paused)
 						IteX = s_LastIteX;
 					else
@@ -423,7 +423,7 @@ void CPlayers::RenderPlayer(
 					vec2 Dir = vec2(pPlayerChar->m_X,pPlayerChar->m_Y) - vec2(pPrevChar->m_X, pPrevChar->m_Y);
 					Dir = normalize(Dir);
 					float HadOkenAngle = GetAngle(Dir);
-					Graphics()->QuadsSetRotation(HadOkenAngle );
+					IEngineGraphics::instance()->QuadsSetRotation(HadOkenAngle );
 					//float offsety = -data->weapons[iw].muzzleoffsety;
 					RenderTools()->SelectSprite(g_pData->m_Weapons.m_aId[iw].m_aSpriteMuzzles[IteX], 0);
 					vec2 DirY(-Dir.y,Dir.x);
@@ -438,7 +438,7 @@ void CPlayers::RenderPlayer(
 		{
 			// TODO: should be an animation
 			Recoil = 0;
-			float a = (Client()->GameTick()-Player.m_AttackTick+IntraTick)/5.0f;
+			float a = (IClient::instance()->GameTick()-Player.m_AttackTick+IntraTick)/5.0f;
 			if(a < 1)
 				Recoil = sinf(a*pi);
 			p = Position + Dir * g_pData->m_Weapons.m_aId[iw].m_Offsetx - Dir*Recoil*10.0f;
@@ -452,7 +452,7 @@ void CPlayers::RenderPlayer(
 			if(g_pData->m_Weapons.m_aId[iw].m_NumSpriteMuzzles)//prev.attackticks)
 			{
 				float Alpha = 0.0f;
-				int Phase1Tick = (Client()->GameTick() - Player.m_AttackTick);
+				int Phase1Tick = (IClient::instance()->GameTick() - Player.m_AttackTick);
 				if (Phase1Tick < (g_pData->m_Weapons.m_aId[iw].m_Muzzleduration + 3))
 				{
 					float t = ((((float)Phase1Tick) + IntraTick)/(float)g_pData->m_Weapons.m_aId[iw].m_Muzzleduration);
@@ -474,7 +474,7 @@ void CPlayers::RenderPlayer(
 				}
 			}
 		}
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsEnd();
 
 		switch (Player.m_Weapon)
 		{
@@ -488,7 +488,7 @@ void CPlayers::RenderPlayer(
 	// render the "shadow" tee
 	if(pInfo.m_Local && g_Config.m_Debug)
 	{
-		vec2 GhostPosition = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick());
+		vec2 GhostPosition = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), IClient::instance()->IntraGameTick());
 		CTeeRenderInfo Ghost = RenderInfo;
 		Ghost.m_ColorBody.a = 0.5f;
 		Ghost.m_ColorFeet.a = 0.5f;
@@ -502,45 +502,45 @@ void CPlayers::RenderPlayer(
 
 	if(Player.m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-		Graphics()->QuadsBegin();
+		IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+		IEngineGraphics::instance()->QuadsBegin();
 		RenderTools()->SelectSprite(SPRITE_DOTDOT);
 		IGraphics::CQuadItem QuadItem(Position.x + 24, Position.y - 40, 64,64);
-		Graphics()->QuadsDraw(&QuadItem, 1);
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsEnd();
 	}
 
-	if (m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() > Client()->GameTick())
+	if (m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart != -1 && m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * IClient::instance()->GameTickSpeed() > IClient::instance()->GameTick())
 	{
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
-		Graphics()->QuadsBegin();
+		IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_EMOTICONS].m_Id);
+		IEngineGraphics::instance()->QuadsBegin();
 
-		int SinceStart = Client()->GameTick() - m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart;
-		int FromEnd = m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * Client()->GameTickSpeed() - Client()->GameTick();
+		int SinceStart = IClient::instance()->GameTick() - m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart;
+		int FromEnd = m_pClient->m_aClients[pInfo.m_ClientID].m_EmoticonStart + 2 * IClient::instance()->GameTickSpeed() - IClient::instance()->GameTick();
 
 		float a = 1;
 
-		if (FromEnd < Client()->GameTickSpeed() / 5)
-			a = FromEnd / (Client()->GameTickSpeed() / 5.0);
+		if (FromEnd < IClient::instance()->GameTickSpeed() / 5)
+			a = FromEnd / (IClient::instance()->GameTickSpeed() / 5.0);
 
 		float h = 1;
-		if (SinceStart < Client()->GameTickSpeed() / 10)
-			h = SinceStart / (Client()->GameTickSpeed() / 10.0);
+		if (SinceStart < IClient::instance()->GameTickSpeed() / 10)
+			h = SinceStart / (IClient::instance()->GameTickSpeed() / 10.0);
 
 		float Wiggle = 0;
-		if (SinceStart < Client()->GameTickSpeed() / 5)
-			Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0);
+		if (SinceStart < IClient::instance()->GameTickSpeed() / 5)
+			Wiggle = SinceStart / (IClient::instance()->GameTickSpeed() / 5.0);
 
 		float WiggleAngle = sinf(5*Wiggle);
 
-		Graphics()->QuadsSetRotation(pi/6*WiggleAngle);
+		IEngineGraphics::instance()->QuadsSetRotation(pi/6*WiggleAngle);
 
-		Graphics()->SetColor(1.0f,1.0f,1.0f,a);
+		IEngineGraphics::instance()->SetColor(1.0f,1.0f,1.0f,a);
 		// client_datas::emoticon is an offset from the first emoticon
 		RenderTools()->SelectSprite(SPRITE_OOP + m_pClient->m_aClients[pInfo.m_ClientID].m_Emoticon);
 		IGraphics::CQuadItem QuadItem(Position.x, Position.y - 23 - 32*h, 64, 64*h);
-		Graphics()->QuadsDraw(&QuadItem, 1);
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsEnd();
 	}
 }
 
@@ -555,8 +555,8 @@ void CPlayers::OnRender()
 			if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				continue;
 
-			const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
-			const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
+			const void *pPrevInfo = IClient::instance()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, i);
+			const void *pInfo = IClient::instance()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, i);
 
 			if(pPrevInfo && pInfo)
 			{

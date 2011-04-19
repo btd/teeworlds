@@ -55,7 +55,7 @@ int CUI::MouseInside(const CUIRect *r)
 
 CUIRect *CUI::Screen()
 {
-	float Aspect = Graphics()->ScreenAspect();
+	float Aspect = IEngineGraphics::instance()->ScreenAspect();
 	float w, h;
 
 	h = 600;
@@ -84,14 +84,14 @@ float CUIRect::Scale() const
 
 void CUI::ClipEnable(const CUIRect *r)
 {
-	float XScale = Graphics()->ScreenWidth()/Screen()->w;
-	float YScale = Graphics()->ScreenHeight()/Screen()->h;
-	Graphics()->ClipEnable((int)(r->x*XScale), (int)(r->y*YScale), (int)(r->w*XScale), (int)(r->h*YScale));
+	float XScale = IEngineGraphics::instance()->ScreenWidth()/Screen()->w;
+	float YScale = IEngineGraphics::instance()->ScreenHeight()/Screen()->h;
+	IEngineGraphics::instance()->ClipEnable((int)(r->x*XScale), (int)(r->y*YScale), (int)(r->w*XScale), (int)(r->h*YScale));
 }
 
 void CUI::ClipDisable()
 {
-	Graphics()->ClipDisable();
+	IEngineGraphics::instance()->ClipDisable();
 }
 
 void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom) const
@@ -340,18 +340,18 @@ int CUI::DoButton(const void *id, const char *text, int checked, const CUIRect *
 void CUI::DoLabel(const CUIRect *r, const char *pText, float Size, int Align, int MaxWidth)
 {
 	// TODO: FIX ME!!!!
-	//Graphics()->BlendNormal();
+	//IEngineGraphics::instance()->BlendNormal();
 	if(Align == 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w/2-tw/2, r->y - Size/10, Size, pText, MaxWidth);
+		float tw = IEngineTextRender::instance()->TextWidth(0, Size, pText, MaxWidth);
+		IEngineTextRender::instance()->Text(0, r->x + r->w/2-tw/2, r->y - Size/10, Size, pText, MaxWidth);
 	}
 	else if(Align < 0)
-		TextRender()->Text(0, r->x, r->y - Size/10, Size, pText, MaxWidth);
+		IEngineTextRender::instance()->Text(0, r->x, r->y - Size/10, Size, pText, MaxWidth);
 	else if(Align > 0)
 	{
-		float tw = TextRender()->TextWidth(0, Size, pText, MaxWidth);
-		TextRender()->Text(0, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
+		float tw = IEngineTextRender::instance()->TextWidth(0, Size, pText, MaxWidth);
+		IEngineTextRender::instance()->Text(0, r->x + r->w-tw, r->y - Size/10, Size, pText, MaxWidth);
 	}
 }
 

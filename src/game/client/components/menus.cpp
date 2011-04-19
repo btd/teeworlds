@@ -83,31 +83,31 @@ vec4 CMenus::ButtonColorMul(const void *pID)
 
 int CMenus::DoButton_Icon(int ImageId, int SpriteId, const CUIRect *pRect)
 {
-	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
 
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->QuadsBegin();
 	RenderTools()->SelectSprite(SpriteId);
 	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	return 0;
 }
 
 int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect)
 {
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	RenderTools()->SelectSprite(Checked?SPRITE_GUIBUTTON_ON:SPRITE_GUIBUTTON_OFF);
 	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 	if((UI()->HotItem() == pID))
 	{
 		RenderTools()->SelectSprite(SPRITE_GUIBUTTON_HOVER);
 		IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 	}
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	return UI()->DoButtonLogic(pID, "", Checked, pRect);
 }
@@ -209,7 +209,7 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 
 			for(int i = 1; i <= Len; i++)
 			{
-				if(TextRender()->TextWidth(0, FontSize, pStr, i) - *Offset + 10 > MxRel)
+				if(IEngineTextRender::instance()->TextWidth(0, FontSize, pStr, i) - *Offset + 10 > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -290,11 +290,11 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// check if the text has to be moved
 	if(UI()->LastActiveItem() == pID && !JustGotActive && (UpdateOffset || m_NumInputEvents))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = IEngineTextRender::instance()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
 		if(w-*Offset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1);
+			float wt = IEngineTextRender::instance()->TextWidth(0, FontSize, pDisplayStr, -1);
 			do
 			{
 				*Offset += min(wt-*Offset-Textbox.w, Textbox.w/3);
@@ -319,10 +319,10 @@ int CMenus::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrS
 	// render the cursor
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = IEngineTextRender::instance()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
 		Textbox = *pRect;
 		Textbox.VSplitLeft(2.0f, 0, &Textbox);
-		Textbox.x += (w-*Offset-TextRender()->TextWidth(0, FontSize, "|", -1)/2);
+		Textbox.x += (w-*Offset-IEngineTextRender::instance()->TextWidth(0, FontSize, "|", -1)/2);
 
 		if((2*time_get()/time_freq()) % 2)	// make it blink
 			UI()->DoLabel(&Textbox, "|", FontSize, -1);
@@ -505,7 +505,7 @@ int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key)
 		if(Key == 0)
 			DoButton_KeySelect(pID, "", 0, pRect);
 		else
-			DoButton_KeySelect(pID, Input()->KeyName(Key), 0, pRect);
+			DoButton_KeySelect(pID, IEngineInput::instance()->KeyName(Key), 0, pRect);
 	}
 	return NewKey;
 }
@@ -519,10 +519,10 @@ int CMenus::RenderMenubar(CUIRect r)
 	m_ActivePage = g_Config.m_UiPage;
 	int NewPage = -1;
 
-	if(Client()->State() != IClient::STATE_OFFLINE)
+	if(IClient::instance()->State() != IClient::STATE_OFFLINE)
 		m_ActivePage = m_GamePage;
 
-	if(Client()->State() == IClient::STATE_OFFLINE)
+	if(IClient::instance()->State() == IClient::STATE_OFFLINE)
 	{
 		// offline menus
 		if(0) // this is not done yet
@@ -538,7 +538,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_InternetButton=0;
 		if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage==PAGE_INTERNET, &Button, CUI::CORNER_TL))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_INTERNET);
 			NewPage = PAGE_INTERNET;
 		}
 
@@ -547,7 +547,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_LanButton=0;
 		if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage==PAGE_LAN, &Button, 0))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_LAN);
 			NewPage = PAGE_LAN;
 		}
 
@@ -556,7 +556,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		static int s_FavoritesButton=0;
 		if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage==PAGE_FAVORITES, &Button, CUI::CORNER_TR))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			NewPage = PAGE_FAVORITES;
 		}
 
@@ -615,7 +615,7 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	if(NewPage != -1)
 	{
-		if(Client()->State() == IClient::STATE_OFFLINE)
+		if(IClient::instance()->State() == IClient::STATE_OFFLINE)
 			g_Config.m_UiPage = NewPage;
 		else
 			m_GamePage = NewPage;
@@ -641,7 +641,7 @@ void CMenus::RenderLoading()
 	ms_GuiColor = vec4(Rgb.r, Rgb.g, Rgb.b, g_Config.m_UiColorAlpha/255.0f);
 
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 	RenderBackground();
 
@@ -652,18 +652,18 @@ void CMenus::RenderLoading()
 	float x = Screen.w/2-w/2;
 	float y = Screen.h/2-h/2;
 
-	Graphics()->BlendNormal();
+	IEngineGraphics::instance()->BlendNormal();
 
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.50f);
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0,0,0,0.50f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 
 	const char *pCaption = Localize("Loading");
 
-	tw = TextRender()->TextWidth(0, 48.0f, pCaption, -1);
+	tw = IEngineTextRender::instance()->TextWidth(0, 48.0f, pCaption, -1);
 	CUIRect r;
 	r.x = x;
 	r.y = y+20;
@@ -671,13 +671,13 @@ void CMenus::RenderLoading()
 	r.h = h;
 	UI()->DoLabel(&r, pCaption, 48.0f, 0, -1);
 
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,0.75f);
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(1,1,1,0.75f);
 	RenderTools()->DrawRoundRect(x+40, y+h-75, (w-80)*Percent, 25, 5.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
-	Graphics()->Swap();
+	IEngineGraphics::instance()->Swap();
 }
 
 void CMenus::RenderNews(CUIRect MainView)
@@ -735,8 +735,8 @@ void CMenus::OnInit()
 		m_Popup = POPUP_LANGUAGE;
 	g_Config.m_ClShowWelcome = 0;
 
-	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
-	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
+	IConsole::instance()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
+	IConsole::instance()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 
 	// setup load amount
 	m_LoadCurrent = 0;
@@ -760,22 +760,22 @@ void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pBu
 int CMenus::Render()
 {
 	CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 	static bool s_First = true;
 	if(s_First)
 	{
 		if(g_Config.m_UiPage == PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_INTERNET);
 		else if(g_Config.m_UiPage == PAGE_LAN)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_LAN);
 		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		m_pClient->m_pSounds->Enqueue(CSounds::CHN_MUSIC, SOUND_MENU);
 		s_First = false;
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE)
+	if(IClient::instance()->State() == IClient::STATE_ONLINE)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
@@ -796,7 +796,7 @@ int CMenus::Render()
 	static bool s_SoundCheck = false;
 	if(!s_SoundCheck && m_Popup == POPUP_NONE)
 	{
-		if(Client()->SoundInitFailed())
+		if(IClient::instance()->SoundInitFailed())
 			m_Popup = POPUP_SOUNDERROR;
 		s_SoundCheck = true;
 	}
@@ -809,14 +809,14 @@ int CMenus::Render()
 		RenderMenubar(TabBar);
 
 		// news is not implemented yet
-		if(g_Config.m_UiPage <= PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
+		if(g_Config.m_UiPage <= PAGE_NEWS || g_Config.m_UiPage > PAGE_SETTINGS || (IClient::instance()->State() == IClient::STATE_OFFLINE && g_Config.m_UiPage >= PAGE_GAME && g_Config.m_UiPage <= PAGE_CALLVOTE))
 		{
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			IServerBrowser::instance()->Refresh(IServerBrowser::TYPE_INTERNET);
 			g_Config.m_UiPage = PAGE_INTERNET;
 		}
 
 		// render current page
-		if(Client()->State() != IClient::STATE_OFFLINE)
+		if(IClient::instance()->State() != IClient::STATE_OFFLINE)
 		{
 			if(m_GamePage == PAGE_GAME)
 				RenderGame(MainView);
@@ -864,7 +864,7 @@ int CMenus::Render()
 			pTitle = Localize("Connecting to");
 			pExtraText = g_Config.m_UiServerAddress; // TODO: query the client about the address
 			pButtonText = Localize("Abort");
-			if(Client()->MapDownloadTotalsize() > 0)
+			if(IClient::instance()->MapDownloadTotalsize() > 0)
 			{
 				pTitle = Localize("Downloading map");
 				pExtraText = "";
@@ -873,7 +873,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_DISCONNECTED)
 		{
 			pTitle = Localize("Disconnected");
-			pExtraText = Client()->ErrorString();
+			pExtraText = IClient::instance()->ErrorString();
 			pButtonText = Localize("Ok");
 			ExtraAlign = -1;
 		}
@@ -958,7 +958,7 @@ int CMenus::Render()
 			// additional info
 			Box.HSplitTop(10.0f, 0, &Box);
 			Box.VMargin(20.f/UI()->Scale(), &Box);
-			if(m_pClient->Editor()->HasUnsavedData())
+			if(IEditor::instance()->HasUnsavedData())
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
@@ -977,7 +977,7 @@ int CMenus::Render()
 
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || m_EnterPressed)
-				Client()->Quit();
+				IClient::instance()->Quit();
 		}
 		else if(m_Popup == POPUP_PASSWORD)
 		{
@@ -999,7 +999,7 @@ int CMenus::Render()
 			static int s_ButtonTryAgain = 0;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || m_EnterPressed)
 			{
-				Client()->Connect(g_Config.m_UiServerAddress);
+				IClient::instance()->Connect(g_Config.m_UiServerAddress);
 			}
 
 			Box.HSplitBottom(60.f, &Box, &Part);
@@ -1025,40 +1025,40 @@ int CMenus::Render()
 			static int s_Button = 0;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || m_EscapePressed || m_EnterPressed)
 			{
-				Client()->Disconnect();
+				IClient::instance()->Disconnect();
 				m_Popup = POPUP_NONE;
 			}
 
-			if(Client()->MapDownloadTotalsize() > 0)
+			if(IClient::instance()->MapDownloadTotalsize() > 0)
 			{
 				int64 Now = time_get();
 				if(Now-m_DownloadLastCheckTime >= time_freq())
 				{
-					if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
+					if(m_DownloadLastCheckSize > IClient::instance()->MapDownloadAmount())
 					{
 						// map downloaded restarted
 						m_DownloadLastCheckSize = 0;
 					}
 
 					// update download speed
-					float Diff = Client()->MapDownloadAmount()-m_DownloadLastCheckSize;
+					float Diff = IClient::instance()->MapDownloadAmount()-m_DownloadLastCheckSize;
 					float StartDiff = m_DownloadLastCheckSize-0.0f;
 					if(StartDiff+Diff > 0.0f)
 						m_DownloadSpeed = (Diff/(StartDiff+Diff))*(Diff/1.0f) + (StartDiff/(Diff+StartDiff))*m_DownloadSpeed;
 					else
 						m_DownloadSpeed = 0.0f;
 					m_DownloadLastCheckTime = Now;
-					m_DownloadLastCheckSize = Client()->MapDownloadAmount();
+					m_DownloadLastCheckSize = IClient::instance()->MapDownloadAmount();
 				}
 
 				Box.HSplitTop(64.f, 0, &Box);
 				Box.HSplitTop(24.f, &Part, &Box);
-				str_format(aBuf, sizeof(aBuf), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount()/1024, Client()->MapDownloadTotalsize()/1024,	m_DownloadSpeed/1024.0f);
+				str_format(aBuf, sizeof(aBuf), "%d/%d KiB (%.1f KiB/s)", IClient::instance()->MapDownloadAmount()/1024, IClient::instance()->MapDownloadTotalsize()/1024,	m_DownloadSpeed/1024.0f);
 				UI()->DoLabel(&Part, aBuf, 20.f, 0, -1);
 
 				// time left
 				const char *pTimeLeftString;
-				int TimeLeft = m_DownloadSpeed > 0.0f ? (Client()->MapDownloadTotalsize()-Client()->MapDownloadAmount())/m_DownloadSpeed : 0.0f;
+				int TimeLeft = m_DownloadSpeed > 0.0f ? (IClient::instance()->MapDownloadTotalsize()-IClient::instance()->MapDownloadAmount())/m_DownloadSpeed : 0.0f;
 				if(TimeLeft >= 60)
 				{
 					TimeLeft /= 60;
@@ -1076,7 +1076,7 @@ int CMenus::Render()
 				Box.HSplitTop(24.f, &Part, &Box);
 				Part.VMargin(40.0f, &Part);
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
-				Part.w = max(10.0f, (Part.w*Client()->MapDownloadAmount())/Client()->MapDownloadTotalsize());
+				Part.w = max(10.0f, (Part.w*IClient::instance()->MapDownloadAmount())/IClient::instance()->MapDownloadTotalsize());
 				RenderTools()->DrawUIRect(&Part, vec4(1.0f, 1.0f, 1.0f, 0.5f), CUI::CORNER_ALL, 5.0f);
 			}
 		}
@@ -1122,7 +1122,7 @@ int CMenus::Render()
 				{
 					char aBuf[512];
 					str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-					if(Storage()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					if(IStorage::instance()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
 						DemolistOnUpdate(false);
@@ -1164,7 +1164,7 @@ int CMenus::Render()
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 					else
 						str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
-					if(Storage()->RenameFile(aBufOld, aBufNew, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
+					if(IStorage::instance()->RenameFile(aBufOld, aBufNew, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
 						DemolistOnUpdate(false);
@@ -1208,8 +1208,8 @@ int CMenus::Render()
 				// remove friend
 				if(m_FriendlistSelectedIndex >= 0)
 				{
-					m_pClient->Friends()->RemoveFriend(m_FriendlistSelectedIndex);
-					Client()->ServerBrowserUpdate();
+					IFriends::instance()->RemoveFriend(m_FriendlistSelectedIndex);
+					IClient::instance()->ServerBrowserUpdate();
 				}
 			}
 		}
@@ -1263,12 +1263,12 @@ void CMenus::SetActive(bool Active)
 			m_NeedSendinfo = false;
 		}
 
-		if(Client()->State() == IClient::STATE_ONLINE)
+		if(IClient::instance()->State() == IClient::STATE_ONLINE)
 		{
 			m_pClient->OnRelease();
 		}
 	}
-	else if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	else if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->OnRelease();
 	}
@@ -1289,8 +1289,8 @@ bool CMenus::OnMouseMove(float x, float y)
 	m_MousePos.y += y;
 	if(m_MousePos.x < 0) m_MousePos.x = 0;
 	if(m_MousePos.y < 0) m_MousePos.y = 0;
-	if(m_MousePos.x > Graphics()->ScreenWidth()) m_MousePos.x = Graphics()->ScreenWidth();
-	if(m_MousePos.y > Graphics()->ScreenHeight()) m_MousePos.y = Graphics()->ScreenHeight();
+	if(m_MousePos.x > IEngineGraphics::instance()->ScreenWidth()) m_MousePos.x = IEngineGraphics::instance()->ScreenWidth();
+	if(m_MousePos.y > IEngineGraphics::instance()->ScreenHeight()) m_MousePos.y = IEngineGraphics::instance()->ScreenHeight();
 
 	return true;
 }
@@ -1337,9 +1337,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	{
 		m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f, vec2(0, 0));
 		m_Popup = POPUP_NONE;
-		if(Client()->ErrorString() && Client()->ErrorString()[0] != 0)
+		if(IClient::instance()->ErrorString() && IClient::instance()->ErrorString()[0] != 0)
 		{
-			if(str_find(Client()->ErrorString(), "password"))
+			if(str_find(IClient::instance()->ErrorString(), "password"))
 			{
 				m_Popup = POPUP_PASSWORD;
 				UI()->SetHotItem(&g_Config.m_Password);
@@ -1375,31 +1375,31 @@ void CMenus::OnRender()
 	render_background();
 
 	CTextCursor cursor;
-	TextRender()->SetCursor(&cursor, 10, 10, 20, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
+	IEngineTextRender::instance()->SetCursor(&cursor, 10, 10, 20, TEXTFLAG_RENDER);
+	IEngineTextRender::instance()->TextEx(&cursor, "ようこそ - ガイド", -1);
 
-	TextRender()->SetCursor(&cursor, 10, 30, 15, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&cursor, "ようこそ - ガイド", -1);
+	IEngineTextRender::instance()->SetCursor(&cursor, 10, 30, 15, TEXTFLAG_RENDER);
+	IEngineTextRender::instance()->TextEx(&cursor, "ようこそ - ガイド", -1);
 
-	//Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->QuadsDrawTL(60, 60, 5000, 5000);
-	Graphics()->QuadsEnd();
+	//IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->QuadsDrawTL(60, 60, 5000, 5000);
+	IEngineGraphics::instance()->QuadsEnd();
 	return;*/
 
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() != IClient::STATE_ONLINE && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 		RenderDemoPlayer(Screen);
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
+	if(IClient::instance()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
 	{
-		Client()->Disconnect();
+		IClient::instance()->Disconnect();
 		SetActive(true);
 		m_Popup = POPUP_PURE;
 	}
@@ -1436,42 +1436,42 @@ void CMenus::OnRender()
 
 	// update the ui
 	CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x/(float)Graphics()->ScreenWidth())*pScreen->w;
-	float my = (m_MousePos.y/(float)Graphics()->ScreenHeight())*pScreen->h;
+	float mx = (m_MousePos.x/(float)IEngineGraphics::instance()->ScreenWidth())*pScreen->w;
+	float my = (m_MousePos.y/(float)IEngineGraphics::instance()->ScreenHeight())*pScreen->h;
 
 	int Buttons = 0;
 	if(m_UseMouseButtons)
 	{
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 	}
 
 	UI()->Update(mx,my,mx*3.0f,my*3.0f,Buttons);
 
 	// render
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 		Render();
 
 	// render cursor
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1,1,1,1);
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_CURSOR].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(1,1,1,1);
 	IGraphics::CQuadItem QuadItem(mx, my, 24, 24);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// render debug information
 	if(g_Config.m_Debug)
 	{
 		CUIRect Screen = *UI()->Screen();
-		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+		IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
-		TextRender()->TextEx(&Cursor, aBuf, -1);
+		IEngineTextRender::instance()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
+		IEngineTextRender::instance()->TextEx(&Cursor, aBuf, -1);
 	}
 
 	m_EscapePressed = false;
@@ -1484,19 +1484,19 @@ static int gs_TextureBlob = -1;
 
 void CMenus::RenderBackground()
 {
-	//Graphics()->Clear(1,1,1);
+	//IEngineGraphics::instance()->Clear(1,1,1);
 	//render_sunrays(0,0);
 	if(gs_TextureBlob == -1)
-		gs_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+		gs_TextureBlob = IEngineGraphics::instance()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 
-	float sw = 300*Graphics()->ScreenAspect();
+	float sw = 300*IEngineGraphics::instance()->ScreenAspect();
 	float sh = 300;
-	Graphics()->MapScreen(0, 0, sw, sh);
+	IEngineGraphics::instance()->MapScreen(0, 0, sw, sh);
 
 	// render background color
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
 		//vec4 bottom(gui_color.r*0.3f, gui_color.g*0.3f, gui_color.b*0.3f, 1.0f);
 		//vec4 bottom(0, 0, 0, 1.0f);
 		vec4 Bottom(ms_GuiColor.r, ms_GuiColor.g, ms_GuiColor.b, 1.0f);
@@ -1506,34 +1506,34 @@ void CMenus::RenderBackground()
 			IGraphics::CColorVertex(1, Top.r, Top.g, Top.b, Top.a),
 			IGraphics::CColorVertex(2, Bottom.r, Bottom.g, Bottom.b, Bottom.a),
 			IGraphics::CColorVertex(3, Bottom.r, Bottom.g, Bottom.b, Bottom.a)};
-		Graphics()->SetColorVertex(Array, 4);
+		IEngineGraphics::instance()->SetColorVertex(Array, 4);
 		IGraphics::CQuadItem QuadItem(0, 0, sw, sh);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// render the tiles
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
 		float Size = 15.0f;
-		float OffsetTime = fmod(Client()->LocalTime()*0.15f, 2.0f);
+		float OffsetTime = fmod(IClient::instance()->LocalTime()*0.15f, 2.0f);
 		for(int y = -2; y < (int)(sw/Size); y++)
 			for(int x = -2; x < (int)(sh/Size); x++)
 			{
-				Graphics()->SetColor(0,0,0,0.045f);
+				IEngineGraphics::instance()->SetColor(0,0,0,0.045f);
 				IGraphics::CQuadItem QuadItem((x-OffsetTime)*Size*2+(y&1)*Size, (y+OffsetTime)*Size, Size, Size);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 			}
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// render border fade
-	Graphics()->TextureSet(gs_TextureBlob);
-	Graphics()->QuadsBegin();
-		Graphics()->SetColor(0,0,0,0.5f);
+	IEngineGraphics::instance()->TextureSet(gs_TextureBlob);
+	IEngineGraphics::instance()->QuadsBegin();
+		IEngineGraphics::instance()->SetColor(0,0,0,0.5f);
 		QuadItem = IGraphics::CQuadItem(-100, -100, sw+200, sh+200);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// restore screen
 	{CUIRect Screen = *UI()->Screen();
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
+	IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);}
 }

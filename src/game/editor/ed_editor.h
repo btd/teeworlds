@@ -119,8 +119,6 @@ class CLayer
 {
 public:
 	class CEditor *m_pEditor;
-	class IGraphics *Graphics();
-	class ITextRender *TextRender();
 
 	CLayer()
 	{
@@ -443,30 +441,17 @@ public:
 
 class CEditor : public IEditor
 {
-	class IInput *m_pInput;
-	class IClient *m_pClient;
-	boost::shared_ptr< IConsole > m_pConsole;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	boost::shared_ptr< IStorage > m_pStorage;
+	
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 public:
-	class IInput *Input() { return m_pInput; };
-	class IClient *Client() { return m_pClient; };
-	boost::shared_ptr< IConsole > Console() { return m_pConsole; };
-	class IGraphics *Graphics() { return m_pGraphics; };
-	class ITextRender *TextRender() { return m_pTextRender; };
-	boost::shared_ptr< IStorage > Storage() { return m_pStorage; };
+	
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() : m_TilesetPicker(16, 16)
 	{
-		m_pInput = 0;
-		m_pClient = 0;
-		m_pGraphics = 0;
-		m_pTextRender = 0;
+		
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
@@ -735,9 +720,5 @@ public:
 		str_copy(pName, pExtractedName, Length);
 	}
 };
-
-// make sure to inline this function
-inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); }
-inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); }
 
 #endif

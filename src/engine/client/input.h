@@ -5,7 +5,6 @@
 
 class CInput : public IEngineInput
 {
-	IEngineGraphics *m_pGraphics;
 
 	int m_InputGrabbed;
 
@@ -13,8 +12,6 @@ class CInput : public IEngineInput
 	int64 m_ReleaseDelta;
 
 	void AddEvent(int Unicode, int Key, int Flags);
-
-	IEngineGraphics *Graphics() { return m_pGraphics; }
 
 public:
 	CInput();

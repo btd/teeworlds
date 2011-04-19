@@ -225,7 +225,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), pText);
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
 
 	if(Team == CHAT_ALL)
 	{
@@ -361,7 +361,7 @@ void CGameContext::CheckPureTuning()
 		CTuningParams p;
 		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)
 		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
 			m_Tuning = p;
 		}
 	}
@@ -456,7 +456,7 @@ void CGameContext::OnTick()
 
 			if(m_VoteEnforce == VOTE_ENFORCE_YES)
 			{
-				Console()->ExecuteLine(m_aVoteCommand);
+				IConsole::instance()->ExecuteLine(m_aVoteCommand);
 				EndVote();
 				SendChat(-1, CGameContext::CHAT_ALL, "Vote passed");
 
@@ -512,7 +512,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	m_VoteUpdate = true;
 }
@@ -573,7 +573,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgID), MsgID, m_NetObjHandler.FailedMsgOn());
-		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
 		return;
 	}
 
@@ -712,7 +712,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
 				Server()->GetClientAddr(KickID, aAddrStr, sizeof(aAddrStr));
 				str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", aAddrStr, g_Config.m_SvVoteKickBantime);
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aCmd);
+				IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aCmd);
 			}
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "spectate") == 0)
@@ -963,11 +963,11 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		pSelf->SendTuningParams(-1);
 	}
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
 }
 
 void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
@@ -976,7 +976,7 @@ void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 	CTuningParams TuningParams;
 	*pSelf->Tuning() = TuningParams;
 	pSelf->SendTuningParams(-1);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
 }
 
 void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
@@ -988,7 +988,7 @@ void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
 		float v;
 		pSelf->Tuning()->Get(i, &v);
 		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->m_apNames[i], v);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
 
@@ -1027,7 +1027,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", ClientID, Team);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	if(!pSelf->m_apPlayers[ClientID])
 		return;
@@ -1043,7 +1043,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved all clients to team %d", Team);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 		if(pSelf->m_apPlayers[i])
@@ -1060,16 +1060,16 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 
 	if(pSelf->m_NumVoteOptions == MAX_VOTE_OPTIONS)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "maximum number of vote options reached");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "maximum number of vote options reached");
 		return;
 	}
 
 	// check for valid option
-	if(!pSelf->Console()->LineIsValid(pCommand) || str_length(pCommand) >= VOTE_CMD_LENGTH)
+	if(!IConsole::instance()->LineIsValid(pCommand) || str_length(pCommand) >= VOTE_CMD_LENGTH)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 	while(*pDescription && *pDescription == ' ')
@@ -1078,7 +1078,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "skipped invalid option '%s'", pDescription);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 
@@ -1090,7 +1090,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "option '%s' already exists", pDescription);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
 		pOption = pOption->m_pNext;
@@ -1113,7 +1113,7 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 	mem_copy(pOption->m_aCommand, pCommand, Len+1);
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "added option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	// inform clients about added option
 	CNetMsg_Sv_VoteOptionAdd OptionMsg;
@@ -1138,7 +1138,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "option '%s' does not exist", pDescription);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		return;
 	}
 
@@ -1152,7 +1152,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 	--pSelf->m_NumVoteOptions;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "removed option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	CHeap *pVoteOptionHeap = new CHeap();
 	CVoteOptionServer *pVoteOptionFirst = 0;
@@ -1203,7 +1203,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			{
 				str_format(aBuf, sizeof(aBuf), "admin forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf);
-				pSelf->Console()->ExecuteLine(pOption->m_aCommand);
+				IConsole::instance()->ExecuteLine(pOption->m_aCommand);
 				break;
 			}
 
@@ -1213,7 +1213,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		if(!pOption)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' isn't an option on this server", pValue);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 			return;
 		}
 	}
@@ -1222,21 +1222,21 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		int KickID = str_toint(pValue);
 		if(KickID < 0 || KickID >= MAX_CLIENTS || !pSelf->m_apPlayers[KickID])
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
 			return;
 		}
 
 		if (!g_Config.m_SvVoteKickBantime)
 		{
 			str_format(aBuf, sizeof(aBuf), "kick %d %s", KickID, pReason);
-			pSelf->Console()->ExecuteLine(aBuf);
+			IConsole::instance()->ExecuteLine(aBuf);
 		}
 		else
 		{
 			char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
 			pSelf->Server()->GetClientAddr(KickID, aAddrStr, sizeof(aAddrStr));
 			str_format(aBuf, sizeof(aBuf), "ban %s %d %s", aAddrStr, g_Config.m_SvVoteKickBantime, pReason);
-			pSelf->Console()->ExecuteLine(aBuf);
+			IConsole::instance()->ExecuteLine(aBuf);
 		}
 	}
 	else if(str_comp_nocase(pType, "spectate") == 0)
@@ -1244,12 +1244,12 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		int SpectateID = str_toint(pValue);
 		if(SpectateID < 0 || SpectateID >= MAX_CLIENTS || !pSelf->m_apPlayers[SpectateID] || pSelf->m_apPlayers[SpectateID]->GetTeam() == TEAM_SPECTATORS)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
 			return;
 		}
 
 		str_format(aBuf, sizeof(aBuf), "set_team %d -1", SpectateID);
-		pSelf->Console()->ExecuteLine(aBuf);
+		IConsole::instance()->ExecuteLine(aBuf);
 	}
 }
 
@@ -1257,7 +1257,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "cleared votes");
 	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
 	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
 	pSelf->m_pVoteOptionHeap->Reset();
@@ -1275,7 +1275,7 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO;
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pResult->GetString(0));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1294,33 +1294,33 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 
 void CGameContext::OnConsoleInit()
 {
-	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConsole = IConsole::instance();
+	boost::shared_ptr <IServer> m_pServer = IServer::instance();
+	boost::shared_ptr <IConsole> m_pConsole = IConsole::instance();
 
-	Console()->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "");
+	m_pConsole->Register("tune", "si", CFGFLAG_SERVER, ConTuneParam, this, "");
+	m_pConsole->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "");
+	m_pConsole->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "");
 
-	Console()->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "");
-	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "");
-	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "");
-	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "");
-	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "");
-	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "");
+	m_pConsole->Register("change_map", "?r", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "");
+	m_pConsole->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "");
+	m_pConsole->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "");
+	m_pConsole->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "");
+	m_pConsole->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "");
+	m_pConsole->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "");
 
-	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "");
-	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "");
-	Console()->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "");
-	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "");
-	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "");
+	m_pConsole->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "");
+	m_pConsole->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "");
+	m_pConsole->Register("force_vote", "ss?r", CFGFLAG_SERVER, ConForceVote, this, "");
+	m_pConsole->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "");
+	m_pConsole->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "");
 
-	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
+	m_pConsole->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 }
 
 void CGameContext::OnInit()
 {
-	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConsole = IConsole::instance();
+	boost::shared_ptr <IServer> m_pServer = IServer::instance();
+	boost::shared_ptr <IConsole> m_pConsole = IConsole::instance();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
@@ -1328,7 +1328,7 @@ void CGameContext::OnInit()
 		//data = load_data_from_memory(internal_data);
 
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
-		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
+		IServer::instance()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
 	m_Layers.Init();
 	m_Collision.Init(&m_Layers);

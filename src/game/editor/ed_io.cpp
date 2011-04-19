@@ -204,12 +204,12 @@ int CEditorMap::Save(const char *pFileName)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 	CDataFileWriter df;
 	if(!df.Open(pFileName))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
-		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 		return 0;
 	}
 
@@ -273,7 +273,7 @@ int CEditorMap::Save(const char *pFileName)
 
 			if(pGroup->m_lLayers[l]->m_Type == LAYERTYPE_TILES)
 			{
-				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving tiles layer");
+				IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving tiles layer");
 				CLayerTiles *pLayer = (CLayerTiles *)pGroup->m_lLayers[l];
 				pLayer->PrepareForSave();
 
@@ -302,7 +302,7 @@ int CEditorMap::Save(const char *pFileName)
 			}
 			else if(pGroup->m_lLayers[l]->m_Type == LAYERTYPE_QUADS)
 			{
-				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving quads layer");
+				IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving quads layer");
 				CLayerQuads *pLayer = (CLayerQuads *)pGroup->m_lLayers[l];
 				if(pLayer->m_lQuads.size())
 				{
@@ -360,17 +360,17 @@ int CEditorMap::Save(const char *pFileName)
 
 	// finish the data file
 	df.Finish();
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
 
 	// send rcon.. if we can
-	if(m_pEditor->Client()->RconAuthed())
+	if(IClient::instance()->RconAuthed())
 	{
 		CServerInfo CurrentServerInfo;
-		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
+		IClient::instance()->GetServerInfo(&CurrentServerInfo);
 		char aMapName[128];
 		m_pEditor->ExtractName(pFileName, aMapName, sizeof(aMapName));
 		if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-			m_pEditor->Client()->Rcon("reload");
+			IClient::instance()->Rcon("reload");
 	}
 
 	return 1;
@@ -425,10 +425,10 @@ int CEditorMap::Load(const char *pFileName, int StorageType)
 
 					// load external
 					CEditorImage ImgInfo(m_pEditor);
-					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
+					if(IEngineGraphics::instance()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 					{
 						*pImg = ImgInfo;
-						pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+						pImg->m_TexID = IEngineGraphics::instance()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 						pImg->m_External = 1;
 					}
 				}
@@ -442,7 +442,7 @@ int CEditorMap::Load(const char *pFileName, int StorageType)
 					void *pData = DataFile.GetData(pItem->m_ImageData);
 					pImg->m_pData = mem_alloc(pImg->m_Width*pImg->m_Height*4, 1);
 					mem_copy(pImg->m_pData, pData, pImg->m_Width*pImg->m_Height*4);
-					pImg->m_TexID = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
+					pImg->m_TexID = IEngineGraphics::instance()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, 0);
 				}
 
 				// copy image name

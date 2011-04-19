@@ -13,10 +13,10 @@
 
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
-	IOHANDLE File = Storage()->OpenFile("countryflags/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = IStorage::instance()->OpenFile("countryflags/index.txt", IOFLAG_READ, IStorage::TYPE_ALL);
 	if(!File)
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "couldn't open index file");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "couldn't open index file");
 		return;
 	}
 
@@ -33,7 +33,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		char *pReplacement = LineReader.Get();
 		if(!pReplacement)
 		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "unexpected end of index file");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "unexpected end of index file");
 			break;
 		}
 
@@ -41,7 +41,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 			continue;
 		}
 
@@ -49,21 +49,21 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
 		CImageInfo Info;
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+		if(!IEngineGraphics::instance()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
 		{
 			char aMsg[128];
 			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aMsg);
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aMsg);
 			continue;
 		}
 
 		// add entry
 		CCountryFlag CountryFlag;
 		CountryFlag.m_CountryCode = str_toint(pReplacement+3);
-		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+		CountryFlag.m_Texture = IEngineGraphics::instance()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 		mem_free(Info.m_pData);
 		str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 		m_aCountryFlags.add(CountryFlag);
 	}
 	io_close(File);
@@ -76,7 +76,7 @@ void CCountryFlags::OnInit()
 	LoadCountryflagsIndexfile();
 	if(!m_aCountryFlags.size())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		DummyEntry.m_Texture = -1;

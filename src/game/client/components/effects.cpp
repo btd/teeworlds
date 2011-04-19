@@ -250,9 +250,9 @@ void CEffects::OnRender()
 	static int64 LastUpdate100hz = 0;
 	static int64 LastUpdate50hz = 0;
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 
 		if(time_get()-LastUpdate100hz > time_freq()/(100*pInfo->m_Speed))
 		{

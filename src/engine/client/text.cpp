@@ -80,9 +80,6 @@ public:
 
 class CTextRender : public IEngineTextRender
 {
-	IGraphics *m_pGraphics;
-	IGraphics *Graphics() { return m_pGraphics; }
-
 	int WordLength(const char *pText)
 	{
 		int s = 1;
@@ -441,8 +438,6 @@ class CTextRender : public IEngineTextRender
 public:
 	CTextRender()
 	{
-		m_pGraphics = 0;
-
 		m_TextR = 1.0f;
 		m_TextG = 1.0f;
 		m_TextB = 1.0f;
@@ -460,7 +455,6 @@ public:
 
 	virtual void Init()
 	{
-		m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 		FT_Init_FreeType(&m_FTLibrary);
 	}
 
@@ -575,10 +569,10 @@ public:
 		float Size = pCursor->m_FontSize;
 
 		// to correct coords, convert to screen coords, round, and convert back
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		IEngineGraphics::instance()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		FakeToScreenX = (Graphics()->ScreenWidth()/(ScreenX1-ScreenX0));
-		FakeToScreenY = (Graphics()->ScreenHeight()/(ScreenY1-ScreenY0));
+		FakeToScreenX = (IEngineGraphics::instance()->ScreenWidth()/(ScreenX1-ScreenX0));
+		FakeToScreenY = (IEngineGraphics::instance()->ScreenHeight()/(ScreenY1-ScreenY0));
 		ActualX = (int)(pCursor->m_X * FakeToScreenX);
 		ActualY = (int)(pCursor->m_Y * FakeToScreenY);
 
@@ -629,11 +623,11 @@ public:
 				else
 					glBindTexture(GL_TEXTURE_2D, pSizeData->m_aTextures[0]);
 
-				Graphics()->QuadsBegin();
+				IEngineGraphics::instance()->QuadsBegin();
 				if (i == 0)
-					Graphics()->SetColor(m_TextOutlineR, m_TextOutlineG, m_TextOutlineB, m_TextOutlineA*m_TextA);
+					IEngineGraphics::instance()->SetColor(m_TextOutlineR, m_TextOutlineG, m_TextOutlineB, m_TextOutlineA*m_TextA);
 				else
-					Graphics()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
+					IEngineGraphics::instance()->SetColor(m_TextR, m_TextG, m_TextB, m_TextA);
 			}
 
 			while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines))
@@ -709,9 +703,9 @@ public:
 
 						if(pCursor->m_Flags&TEXTFLAG_RENDER)
 						{
-							Graphics()->QuadsSetSubset(pChr->m_aUvs[0], pChr->m_aUvs[1], pChr->m_aUvs[2], pChr->m_aUvs[3]);
+							IEngineGraphics::instance()->QuadsSetSubset(pChr->m_aUvs[0], pChr->m_aUvs[1], pChr->m_aUvs[2], pChr->m_aUvs[3]);
 							IGraphics::CQuadItem QuadItem(DrawX+pChr->m_OffsetX*Size, DrawY+pChr->m_OffsetY*Size, pChr->m_Width*Size, pChr->m_Height*Size);
-							Graphics()->QuadsDrawTL(&QuadItem, 1);
+							IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 						}
 
 						DrawX += Advance*Size;
@@ -731,7 +725,7 @@ public:
 			}
 
 			if(pCursor->m_Flags&TEXTFLAG_RENDER)
-				Graphics()->QuadsEnd();
+				IEngineGraphics::instance()->QuadsEnd();
 		}
 
 		pCursor->m_X = DrawX;

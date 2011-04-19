@@ -28,7 +28,7 @@ void CVoting::Callvote(const char *pType, const char *pValue, const char *pReaso
 	Msg.m_Type = pType;
 	Msg.m_Value = pValue;
 	Msg.m_Reason = pReason;
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	IClient::instance()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 }
 
 void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote)
@@ -37,7 +37,7 @@ void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "set_team %d -1", ClientID);
-		Client()->Rcon(aBuf);
+		IClient::instance()->Rcon(aBuf);
 	}
 	else
 	{
@@ -53,7 +53,7 @@ void CVoting::CallvoteKick(int ClientID, const char *pReason, bool ForceVote)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "force_vote kick %d %s", ClientID, pReason);
-		Client()->Rcon(aBuf);
+		IClient::instance()->Rcon(aBuf);
 	}
 	else
 	{
@@ -74,7 +74,7 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "force_vote option \"%s\" %s", pOption->m_aDescription, pReason);
-				Client()->Rcon(aBuf);
+				IClient::instance()->Rcon(aBuf);
 			}
 			else
 				Callvote("option", pOption->m_aDescription, pReason);
@@ -95,7 +95,7 @@ void CVoting::RemovevoteOption(int OptionID)
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "remove_vote \"%s\"", pOption->m_aDescription);
-			Client()->Rcon(aBuf);
+			IClient::instance()->Rcon(aBuf);
 			break;
 		}
 
@@ -108,13 +108,13 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "add_vote \"%s\" %s", pDescription, pCommand);
-	Client()->Rcon(aBuf);
+	IClient::instance()->Rcon(aBuf);
 }
 
 void CVoting::Vote(int v)
 {
 	CNetMsg_Cl_Vote Msg = {v};
-	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL);
+	IClient::instance()->SendPackMsg(&Msg, MSGFLAG_VITAL);
 }
 
 CVoting::CVoting()
@@ -173,8 +173,8 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	Console()->Register("callvote", "ss?r", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
-	Console()->Register("vote", "r", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
+	IConsole::instance()->Register("callvote", "ss?r", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
+	IConsole::instance()->Register("vote", "r", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
 void CVoting::OnMessage(int MsgType, void *pRawMsg)

@@ -20,9 +20,9 @@ struct CDemoHeader
 	char m_aTimestamp[20];
 };
 
-class IDemoPlayer : public IInterface
+class IDemoPlayer 
 {
-	MACRO_INTERFACE("demoplayer", 0)
+	SINGLETON_DEFAULT_DEF (IDemoPlayer) 
 public:
 	class CInfo
 	{
@@ -53,9 +53,9 @@ public:
 	virtual int GetDemoType() const = 0;
 };
 
-class IDemoRecorder : public IInterface
+class IDemoRecorder 
 {
-	MACRO_INTERFACE("demorecorder", 0)
+	SINGLETON_DEFAULT_DEF (IDemoRecorder) 
 public:
 	~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;

@@ -22,7 +22,7 @@ static int g_UiNumPopups = 0;
 
 void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Width, float Height, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect), void *pExtra)
 {
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
 	if(x + Width > UI()->Screen()->w)
 		x -= Width;
 	if(y + Height > UI()->Screen()->h)
@@ -73,7 +73,7 @@ void CEditor::UiDoPopupMenu()
 		if(s_UiPopups[i].m_pfnFunc(this, r))
 			g_UiNumPopups--;
 
-		if(Input()->KeyDown(KEY_ESCAPE))
+		if(IEngineInput::instance()->KeyDown(KEY_ESCAPE))
 			g_UiNumPopups--;
 	}
 }
@@ -544,7 +544,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderName);
-				if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
+				if(IStorage::instance()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 				{
 					pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
 					return 1;
@@ -673,13 +673,13 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View)
 	}
 
 	if(ShowImage >= 0 && ShowImage < pEditor->m_Map.m_lImages.size())
-		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
+		IEngineGraphics::instance()->TextureSet(pEditor->m_Map.m_lImages[ShowImage]->m_TexID);
 	else
-		pEditor->Graphics()->TextureSet(-1);
-	pEditor->Graphics()->QuadsBegin();
+		IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
 	IGraphics::CQuadItem QuadItem(ImageView.x, ImageView.y, ImageView.w, ImageView.h);
-	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-	pEditor->Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	return 0;
 }

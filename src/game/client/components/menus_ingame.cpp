@@ -37,7 +37,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
 	static int s_DisconnectButton = 0;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
-		Client()->Disconnect();
+		IClient::instance()->Disconnect();
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj)
 	{
@@ -99,13 +99,13 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitLeft(150.0f, &Button, &ButtonBar);
 
 	static int s_DemoButton = 0;
-	bool Recording = DemoRecorder()->IsRecording();
+	bool Recording = IDemoRecorder::instance()->IsRecording();
 	if(DoButton_Menu(&s_DemoButton, Localize(Recording ? "Stop record" : "Record demo"), 0, &Button))	// Localize("Stop record");Localize("Record demo");
 	{
 		if(!Recording)
-			Client()->DemoRecorder_Start("demo", true);
+			IClient::instance()->DemoRecorder_Start("demo", true);
 		else
-			Client()->DemoRecorder_Stop();
+			IClient::instance()->DemoRecorder_Stop();
 	}
 }
 
@@ -129,21 +129,21 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h*2.0f;
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	RenderTools()->SelectSprite(SPRITE_GUIICON_MUTE);
 	IGraphics::CQuadItem QuadItem(Button.x, Button.y, Button.w, Button.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GUIICONS].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	RenderTools()->SelectSprite(SPRITE_GUIICON_FRIEND);
 	QuadItem = IGraphics::CQuadItem(Button.x, Button.y, Button.w, Button.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// options
 	static int s_aPlayerIDs[MAX_CLIENTS][2] = {{0}};
@@ -166,13 +166,13 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Player.HSplitTop(1.5f, 0, &Player);
 		Player.VSplitMid(&Player, &Button);
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		IEngineTextRender::instance()->SetCursor(&Cursor, Player.x, Player.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aName, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aName, -1);
 
-		TextRender()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		IEngineTextRender::instance()->SetCursor(&Cursor, Button.x,Button.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aClan, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_pClient->m_aClients[i].m_aClan, -1);
 
 		// ignore button
 		ButtonBar.HMargin(2.0f, &ButtonBar);
@@ -189,9 +189,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Button.VSplitLeft(Button.h, &Button, 0);
 		if(DoButton_Toggle(&s_aPlayerIDs[i][1], m_pClient->m_aClients[i].m_Friend, &Button))
 			if(m_pClient->m_aClients[i].m_Friend)
-				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[i].m_aName, m_pClient->m_aClients[i].m_aClan);
+				IFriends::instance()->RemoveFriend(m_pClient->m_aClients[i].m_aName, m_pClient->m_aClients[i].m_aClan);
 			else
-				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[i].m_aName, m_pClient->m_aClients[i].m_aClan);
+				IFriends::instance()->AddFriend(m_pClient->m_aClients[i].m_aName, m_pClient->m_aClients[i].m_aClan);
 	}
 
 	/*
@@ -253,7 +253,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 	// fetch server info
 	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
+	IClient::instance()->GetServerInfo(&CurrentServerInfo);
 
 	// render background
 	RenderTools()->DrawUIRect(&MainView, ms_ColorTabbarActive, CUI::CORNER_ALL, 10.0f);
@@ -278,7 +278,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 32, Localize("Server info"), 250);
+	IEngineTextRender::instance()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 32, Localize("Server info"), 250);
 	y += 32.0f+5.0f;
 
 	mem_zero(aBuf, sizeof(aBuf));
@@ -297,19 +297,19 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		Localize("Password"), CurrentServerInfo.m_Flags &1 ? Localize("Yes") : Localize("No")
 	);
 
-	TextRender()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 20, aBuf, 250);
+	IEngineTextRender::instance()->Text(0, ServerInfo.x+x, ServerInfo.y+y, 20, aBuf, 250);
 
 	{
 		CUIRect Button;
-		int IsFavorite = ServerBrowser()->IsFavorite(CurrentServerInfo.m_NetAddr);
+		int IsFavorite = IServerBrowser::instance()->IsFavorite(CurrentServerInfo.m_NetAddr);
 		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
 		static int s_AddFavButton = 0;
 		if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), IsFavorite, &Button))
 		{
 			if(IsFavorite)
-				ServerBrowser()->RemoveFavorite(CurrentServerInfo.m_NetAddr);
+				IServerBrowser::instance()->RemoveFavorite(CurrentServerInfo.m_NetAddr);
 			else
-				ServerBrowser()->AddFavorite(CurrentServerInfo.m_NetAddr);
+				IServerBrowser::instance()->AddFavorite(CurrentServerInfo.m_NetAddr);
 		}
 	}
 
@@ -322,7 +322,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 32, Localize("Game info"), 250);
+	IEngineTextRender::instance()->Text(0, GameInfo.x+x, GameInfo.y+y, 32, Localize("Game info"), 250);
 	y += 32.0f+5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -344,7 +344,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients
 		);
-		TextRender()->Text(0, GameInfo.x+x, GameInfo.y+y, 20, aBuf, 250);
+		IEngineTextRender::instance()->Text(0, GameInfo.x+x, GameInfo.y+y, 20, aBuf, 250);
 	}
 
 	// motd
@@ -353,9 +353,9 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	Motd.Margin(5.0f, &Motd);
 	y = 0.0f;
 	x = 5.0f;
-	TextRender()->Text(0, Motd.x+x, Motd.y+y, 32, Localize("MOTD"), -1);
+	IEngineTextRender::instance()->Text(0, Motd.x+x, Motd.y+y, 32, Localize("MOTD"), -1);
 	y += 32.0f+5.0f;
-	TextRender()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
+	IEngineTextRender::instance()->Text(0, Motd.x+x, Motd.y+y, 16, m_pClient->m_pMotd->m_aServerMotd, (int)Motd.w);
 }
 
 void CMenus::RenderServerControlServer(CUIRect MainView)
@@ -495,13 +495,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
 		UI()->DoLabelScaled(&Reason, pLabel, 14.0f, -1);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1);
+		float w = IEngineTextRender::instance()->TextWidth(0, 14.0f, pLabel, -1);
 		Reason.VSplitLeft(w+10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
 		DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, CUI::CORNER_ALL);
 
 		// extended features (only available when authed in rcon)
-		if(Client()->RconAuthed())
+		if(IClient::instance()->RconAuthed())
 		{
 			// background
 			Extended.Margin(10.0f, &Extended);

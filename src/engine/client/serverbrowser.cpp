@@ -31,7 +31,6 @@ public:
 
 CServerBrowser::CServerBrowser()
 {
-	m_pMasterServer = 0;
 	m_ppServerlist = 0;
 	m_pSortedServerlist = 0;
 
@@ -65,12 +64,7 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 {
 	m_pNetClient = pClient;
 	str_copy(m_aNetVersion, pNetVersion, sizeof(m_aNetVersion));
-	m_pMasterServer = Kernel()->RequestInterface<IMasterServer>();
-	m_pConsole = IConsole::instance();
-	m_pFriends = Kernel()->RequestInterface<IFriends>();
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfig::instance()->RegisterCallback(ConfigSaveCallback, this);
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index) const
@@ -149,7 +143,7 @@ void CServerBrowser::Filter()
 			Filtered = 1;
 			for(p = 0; p < m_ppServerlist[i]->m_Info.m_NumClients; p++)
 			{
-				if(m_pFriends->IsFriend(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, false))
+				if(IFriends::instance()->IsFriend(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, false))
 				{
 					Filtered = 0;
 					break;
@@ -502,7 +496,7 @@ void CServerBrowser::Refresh(int Type)
 		}
 
 		if(g_Config.m_Debug)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "broadcasting for servers");
 	}
 	else if(Type == IServerBrowser::TYPE_INTERNET)
 		m_NeedRefresh = 1;
@@ -524,7 +518,7 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr));
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf),"requesting server info from %s", aAddrStr);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
 	}
 
 	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
@@ -556,7 +550,7 @@ void CServerBrowser::Update(bool ForceResort)
 	CServerEntry *pEntry, *pNext;
 
 	// do server list requests
-	if(m_NeedRefresh && !m_pMasterServer->IsRefreshing())
+	if(m_NeedRefresh && !IEngineMasterServer::instance()->IsRefreshing())
 	{
 		NETADDR Addr;
 		CNetChunk Packet;
@@ -572,16 +566,16 @@ void CServerBrowser::Update(bool ForceResort)
 
 		for(i = 0; i < IMasterServer::MAX_MASTERSERVERS; i++)
 		{
-			if(!m_pMasterServer->IsValid(i))
+			if(!IEngineMasterServer::instance()->IsValid(i))
 				continue;
 
-			Addr = m_pMasterServer->GetAddr(i);
+			Addr = IEngineMasterServer::instance()->GetAddr(i);
 			Packet.m_Address = Addr;
 			m_pNetClient->Send(&Packet);
 		}
 
 		if(g_Config.m_Debug)
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "requesting server list");
+			IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", "requesting server list");
 	}
 
 	// do timeouts
@@ -665,7 +659,7 @@ void CServerBrowser::AddFavorite(const NETADDR &Addr)
 		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr));
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "added fav, %s", aAddrStr);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
 	}
 }
 
@@ -697,7 +691,7 @@ bool CServerBrowser::IsRefreshing() const
 
 bool CServerBrowser::IsRefreshingMasters() const
 {
-	return m_pMasterServer->IsRefreshing();
+	return IEngineMasterServer::instance()->IsRefreshing();
 }
 
 

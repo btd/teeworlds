@@ -36,7 +36,7 @@ enum
 
 CEditorImage::~CEditorImage()
 {
-	m_pEditor->Graphics()->UnloadTexture(m_TexID);
+	IEngineGraphics::instance()->UnloadTexture(m_TexID);
 }
 
 CLayerGroup::CLayerGroup()
@@ -74,7 +74,7 @@ void CLayerGroup::Mapping(float *pPoints)
 		m_pMap->m_pEditor->m_WorldOffsetX, m_pMap->m_pEditor->m_WorldOffsetY,
 		m_ParallaxX/100.0f, m_ParallaxY/100.0f,
 		m_OffsetX, m_OffsetY,
-		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
+		IEngineGraphics::instance()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
 
 	pPoints[0] += m_pMap->m_pEditor->m_EditorOffsetX;
 	pPoints[1] += m_pMap->m_pEditor->m_EditorOffsetY;
@@ -86,13 +86,13 @@ void CLayerGroup::MapScreen()
 {
 	float aPoints[4];
 	Mapping(aPoints);
-	m_pMap->m_pEditor->Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+	IEngineGraphics::instance()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }
 
 void CLayerGroup::Render()
 {
 	MapScreen();
-	IGraphics *pGraphics = m_pMap->m_pEditor->Graphics();
+	boost::shared_ptr<IEngineGraphics> pGraphics = IEngineGraphics::instance();
 
 	if(m_UseClipping)
 	{
@@ -212,7 +212,7 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 
 			for (int i = 1; i <= Len; i++)
 			{
-				if (TextRender()->TextWidth(0, FontSize, pStr, i) + 10 > MxRel)
+				if (IEngineTextRender::instance()->TextWidth(0, FontSize, pStr, i) + 10 > MxRel)
 				{
 					s_AtIndex = i - 1;
 					break;
@@ -223,10 +223,10 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 			}
 		}
 
-		for(int i = 0; i < Input()->NumEvents(); i++)
+		for(int i = 0; i < IEngineInput::instance()->NumEvents(); i++)
 		{
 			Len = str_length(pStr);
-			ReturnValue |= CLineInput::Manipulate(Input()->GetEvent(i), pStr, StrSize, &Len, &s_AtIndex);
+			ReturnValue |= CLineInput::Manipulate(IEngineInput::instance()->GetEvent(i), pStr, StrSize, &Len, &s_AtIndex);
 		}
 	}
 
@@ -273,7 +273,7 @@ int CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned Str
 	//TODO: make it blink
 	if(UI()->LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
+		float w = IEngineTextRender::instance()->TextWidth(0, FontSize, pDisplayStr, s_AtIndex);
 		Textbox = *pRect;
 		Textbox.VSplitLeft(2.0f, 0, &Textbox);
 		Textbox.x += w*UI()->Scale();
@@ -390,11 +390,11 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	RenderTools()->DrawUIRect(pRect, GetButtonColor(pID, Checked), CUI::CORNER_ALL, 3.0f);
 	CUIRect NewRect = *pRect;
 	NewRect.y += NewRect.h/2.0f-7.0f;
-	float tw = min(TextRender()->TextWidth(0, 10.0f, pText, -1), NewRect.w);
+	float tw = min(IEngineTextRender::instance()->TextWidth(0, 10.0f, pText, -1), NewRect.w);
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	IEngineTextRender::instance()->SetCursor(&Cursor, NewRect.x + NewRect.w/2-tw/2, NewRect.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = NewRect.w;
-	TextRender()->TextEx(&Cursor, pText, -1);
+	IEngineTextRender::instance()->TextEx(&Cursor, pText, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -428,9 +428,9 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 	CUIRect t = *pRect;
 	t.VMargin(5.0f, &t);
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, t.x, t.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+	IEngineTextRender::instance()->SetCursor(&Cursor, t.x, t.y - 1.0f, 10.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 	Cursor.m_LineWidth = t.w;
-	TextRender()->TextEx(&Cursor, pText, -1);
+	IEngineTextRender::instance()->TextEx(&Cursor, pText, -1);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -468,14 +468,14 @@ int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked,
 
 void CEditor::RenderBackground(CUIRect View, int Texture, float Size, float Brightness)
 {
-	Graphics()->TextureSet(Texture);
-	Graphics()->BlendNormal();
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Brightness, Brightness, Brightness, 1.0f);
-	Graphics()->QuadsSetSubset(0,0, View.w/Size, View.h/Size);
+	IEngineGraphics::instance()->TextureSet(Texture);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(Brightness, Brightness, Brightness, 1.0f);
+	IEngineGraphics::instance()->QuadsSetSubset(0,0, View.w/Size, View.h/Size);
 	IGraphics::CQuadItem QuadItem(View.x, View.y, View.w, View.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 }
 
 int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip)
@@ -496,7 +496,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		}
 		else
 		{
-			if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+			if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 				s_Value += m_MouseDeltaX*0.05f;
 			else
 				s_Value += m_MouseDeltaX;
@@ -631,7 +631,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
     TB_Bottom.HSplitTop(2.5f, 0, &TB_Bottom);
 
 	// ctrl+o to open
-	if(Input()->KeyDown('o') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)))
+	if(IEngineInput::instance()->KeyDown('o') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL)))
 	{
 		if(HasUnsavedData())
 		{
@@ -643,7 +643,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	}
 
 	// ctrl+s to save
-	if(Input()->KeyDown('s') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)))
+	if(IEngineInput::instance()->KeyDown('s') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL)))
 	{
 		if(m_aFileName[0] && m_ValidSaveFilename)	
 		{
@@ -659,7 +659,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 	static int s_HqButton = 0;
 	if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
-		(Input()->KeyDown('h') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(IEngineInput::instance()->KeyDown('h') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ShowDetail = !m_ShowDetail;
 	}
@@ -670,7 +670,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_AnimateButton = 0;
 	if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
-		(Input()->KeyDown('m') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(IEngineInput::instance()->KeyDown('m') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL))))
 	{
 		m_AnimateStart = time_get();
 		m_Animate = !m_Animate;
@@ -682,7 +682,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_ProofButton = 0;
 	if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
-		(Input()->KeyDown('p') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(IEngineInput::instance()->KeyDown('p') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ProofBorders = !m_ProofBorders;
 	}
@@ -693,7 +693,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 	static int s_TileInfoButton = 0;
 	if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile informations") ||
-		(Input()->KeyDown('i') && (Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))))
+		(IEngineInput::instance()->KeyDown('i') && (IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL))))
 	{
 		m_ShowTileInfo = !m_ShowTileInfo;
 	}
@@ -703,12 +703,12 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// zoom group
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 	static int s_ZoomOutButton = 0;
-	if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", CUI::CORNER_L) || Input()->KeyDown(KEY_KP_MINUS))
+	if(DoButton_Ex(&s_ZoomOutButton, "ZO", 0, &Button, 0, "[NumPad-] Zoom out", CUI::CORNER_L) || IEngineInput::instance()->KeyDown(KEY_KP_MINUS))
 		m_ZoomLevel += 50;
 
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 	static int s_ZoomNormalButton = 0;
-	if(DoButton_Ex(&s_ZoomNormalButton, "1:1", 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", 0) || Input()->KeyDown(KEY_KP_MULTIPLY))
+	if(DoButton_Ex(&s_ZoomNormalButton, "1:1", 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", 0) || IEngineInput::instance()->KeyDown(KEY_KP_MULTIPLY))
 	{
 		m_EditorOffsetX = 0;
 		m_EditorOffsetY = 0;
@@ -717,7 +717,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 	TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 	static int s_ZoomInButton = 0;
-	if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R) || Input()->KeyDown(KEY_KP_PLUS))
+	if(DoButton_Ex(&s_ZoomInButton, "ZI", 0, &Button, 0, "[NumPad+] Zoom in", CUI::CORNER_R) || IEngineInput::instance()->KeyDown(KEY_KP_PLUS))
 		m_ZoomLevel -= 50;
 
 	TB_Top.VSplitLeft(10.0f, 0, &TB_Top);
@@ -741,10 +741,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			m_AnimateSpeed -= 0.5f;
 	}
 
-	if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP) && m_Dialog == DIALOG_NONE)
+	if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_UP) && m_Dialog == DIALOG_NONE)
 		m_ZoomLevel -= 20;
 
-	if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && m_Dialog == DIALOG_NONE)
+	if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_DOWN) && m_Dialog == DIALOG_NONE)
 		m_ZoomLevel += 20;
 
 	if(m_ZoomLevel < 50)
@@ -761,7 +761,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// flip buttons
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_FlipXButton = 0;
-		if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || Input()->KeyDown('n'))
+		if(DoButton_Ex(&s_FlipXButton, "X/X", Enabled, &Button, 0, "[N] Flip brush horizontal", CUI::CORNER_L) || IEngineInput::instance()->KeyDown('n'))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushFlipX();
@@ -769,7 +769,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_FlipyButton = 0;
-		if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || Input()->KeyDown('m'))
+		if(DoButton_Ex(&s_FlipyButton, "Y/Y", Enabled, &Button, 0, "[M] Flip brush vertical", CUI::CORNER_R) || IEngineInput::instance()->KeyDown('m'))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushFlipY();
@@ -794,7 +794,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_CcwButton = 0;
-		if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || Input()->KeyDown('r'))
+		if(DoButton_Ex(&s_CcwButton, "CCW", Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", CUI::CORNER_L) || IEngineInput::instance()->KeyDown('r'))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushRotate(-s_RotationAmount/360.0f*pi*2);
@@ -802,7 +802,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
 		static int s_CwButton = 0;
-		if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || Input()->KeyDown('t'))
+		if(DoButton_Ex(&s_CwButton, "CW", Enabled, &Button, 0, "[T] Rotates the brush clockwise", CUI::CORNER_R) || IEngineInput::instance()->KeyDown('t'))
 		{
 			for(int i = 0; i < m_Brush.m_lLayers.size(); i++)
 				m_Brush.m_lLayers[i]->BrushRotate(s_RotationAmount/360.0f*pi*2);
@@ -856,7 +856,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// refocus button
 	TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
 	static int s_RefocusButton = 0;
-	if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY?0:-1, &Button, 0, "[HOME] Restore map focus") || Input()->KeyDown(KEY_HOME))
+	if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX&&m_WorldOffsetY?0:-1, &Button, 0, "[HOME] Restore map focus") || IEngineInput::instance()->KeyDown(KEY_HOME))
 	{
 		m_WorldOffsetX = 0;
 		m_WorldOffsetY = 0;
@@ -904,9 +904,9 @@ void CEditor::DoQuad(CQuad *q, int Index)
 	// draw selection background
 	if(m_SelectedQuad == Index)
 	{
-		Graphics()->SetColor(0,0,0,1);
+		IEngineGraphics::instance()->SetColor(0,0,0,1);
 		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f, 7.0f);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 	}
 
 	if(UI()->ActiveItem() == pID)
@@ -960,20 +960,20 @@ void CEditor::DoQuad(CQuad *q, int Index)
 			}
 		}
 
-		Graphics()->SetColor(1,1,1,1);
+		IEngineGraphics::instance()->SetColor(1,1,1,1);
 	}
 	else if(UI()->HotItem() == pID)
 	{
 		ms_pUiGotContext = pID;
 
-		Graphics()->SetColor(1,1,1,1);
+		IEngineGraphics::instance()->SetColor(1,1,1,1);
 		m_pTooltip = "Left mouse button to move. Hold shift to move pivot. Hold ctrl to rotate.";
 
 		if(UI()->MouseButton(0))
 		{
-			if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+			if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 				s_Operation = OP_MOVE_PIVOT;
-			else if(Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL))
+			else if(IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL))
 			{
 				m_LockMouse = true;
 				s_Operation = OP_ROTATE;
@@ -1000,10 +1000,10 @@ void CEditor::DoQuad(CQuad *q, int Index)
 		}
 	}
 	else
-		Graphics()->SetColor(0,1,0,1);
+		IEngineGraphics::instance()->SetColor(0,1,0,1);
 
 	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f*m_WorldZoom, 5.0f*m_WorldZoom);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
@@ -1024,9 +1024,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	// draw selection background
 	if(m_SelectedQuad == QuadIndex && m_SelectedPoints&(1<<V))
 	{
-		Graphics()->SetColor(0,0,0,1);
+		IEngineGraphics::instance()->SetColor(0,0,0,1);
 		IGraphics::CQuadItem QuadItem(px, py, 7.0f, 7.0f);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 	}
 
 	enum
@@ -1093,7 +1093,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			{
 				if(!s_Moved)
 				{
-					if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+					if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 						m_SelectedPoints ^= 1<<V;
 					else
 						m_SelectedPoints = 1<<V;
@@ -1103,20 +1103,20 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			}
 		}
 
-		Graphics()->SetColor(1,1,1,1);
+		IEngineGraphics::instance()->SetColor(1,1,1,1);
 	}
 	else if(UI()->HotItem() == pID)
 	{
 		ms_pUiGotContext = pID;
 
-		Graphics()->SetColor(1,1,1,1);
+		IEngineGraphics::instance()->SetColor(1,1,1,1);
 		m_pTooltip = "Left mouse button to move. Hold shift to move the texture.";
 
 		if(UI()->MouseButton(0))
 		{
 			UI()->SetActiveItem(pID);
 			s_Moved = false;
-			if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+			if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 			{
 				s_Operation = OP_MOVEUV;
 				m_LockMouse = true;
@@ -1126,7 +1126,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 			if(!(m_SelectedPoints&(1<<V)))
 			{
-				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+				if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 					m_SelectedPoints |= 1<<V;
 				else
 					m_SelectedPoints = 1<<V;
@@ -1142,7 +1142,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			UI()->SetActiveItem(pID);
 			if(!(m_SelectedPoints&(1<<V)))
 			{
-				if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+				if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 					m_SelectedPoints |= 1<<V;
 				else
 					m_SelectedPoints = 1<<V;
@@ -1151,17 +1151,17 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		}
 	}
 	else
-		Graphics()->SetColor(1,0,0,1);
+		IEngineGraphics::instance()->SetColor(1,0,0,1);
 
 	IGraphics::CQuadItem QuadItem(px, py, 5.0f*m_WorldZoom, 5.0f*m_WorldZoom);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 }
 
 void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 {
 	//UI()->ClipEnable(&view);
 
-	bool ShowPicker = Input()->KeyPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE;
+	bool ShowPicker = IEngineInput::instance()->KeyPressed(KEY_SPACE) != 0 && m_Dialog == DIALOG_NONE;
 
 	// render all good stuff
 	if(!ShowPicker)
@@ -1220,7 +1220,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		float y = -(View.y/Screen.h)*h;
 		wx = x+w*mx/Screen.w;
 		wy = y+h*my/Screen.h;
-		Graphics()->MapScreen(x, y, x+w, y+h);
+		IEngineGraphics::instance()->MapScreen(x, y, x+w, y+h);
 		CLayerTiles *t = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
 		if(t)
 		{
@@ -1268,10 +1268,10 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					IGraphics::CLineItem(w, 0, w, h),
 					IGraphics::CLineItem(w, h, 0, h),
 					IGraphics::CLineItem(0, h, 0, 0)};
-				Graphics()->TextureSet(-1);
-				Graphics()->LinesBegin();
-				Graphics()->LinesDraw(Array, 4);
-				Graphics()->LinesEnd();
+				IEngineGraphics::instance()->TextureSet(-1);
+				IEngineGraphics::instance()->LinesBegin();
+				IEngineGraphics::instance()->LinesDraw(Array, 4);
+				IEngineGraphics::instance()->LinesEnd();
 			}
 		}
 	}
@@ -1288,9 +1288,9 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 			s_StartMx = mx;
 			s_StartMy = my;
 
-			if(Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL) || UI()->MouseButton(2))
+			if(IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL) || UI()->MouseButton(2))
 			{
-				if(Input()->KeyPressed(KEY_LSHIFT))
+				if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT))
 					s_Operation = OP_PAN_EDITOR;
 				else
 					s_Operation = OP_PAN_WORLD;
@@ -1344,7 +1344,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 						// grab brush
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf),"grabbing %f %f %f %f", r.x, r.y, r.w, r.h);
-						Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+						IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
 
 						// TODO: do all layers
 						int Grabs = 0;
@@ -1358,7 +1358,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 					}
 				}
 				else if(s_Operation == OP_BRUSH_PAINT)
@@ -1373,7 +1373,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 						//editor.map.groups[selected_group]->mapscreen();
 						for(int k = 0; k < NumEditLayers; k++)
 							pEditLayers[k]->BrushSelecting(r);
-						Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+						IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 					}
 				}
 			}
@@ -1400,7 +1400,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					}
 					
 					CLayerTiles *pLayer = (CLayerTiles*)GetSelectedLayerType(0, LAYERTYPE_TILES);
-					if((Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT)) && pLayer)
+					if((IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT)) && pLayer)
                         s_Operation = OP_BRUSH_PAINT;
 				}
 
@@ -1434,10 +1434,10 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 							IGraphics::CLineItem(w, 0, w, h),
 							IGraphics::CLineItem(w, h, 0, h),
 							IGraphics::CLineItem(0, h, 0, 0)};
-						Graphics()->TextureSet(-1);
-						Graphics()->LinesBegin();
-						Graphics()->LinesDraw(Array, 4);
-						Graphics()->LinesEnd();
+						IEngineGraphics::instance()->TextureSet(-1);
+						IEngineGraphics::instance()->LinesBegin();
+						IEngineGraphics::instance()->LinesDraw(Array, 4);
+						IEngineGraphics::instance()->LinesEnd();
 					}
 				}
 			}
@@ -1458,8 +1458,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					{
 						CLayerQuads *pLayer = (CLayerQuads *)pEditLayers[k];
 
-						Graphics()->TextureSet(-1);
-						Graphics()->QuadsBegin();
+						IEngineGraphics::instance()->TextureSet(-1);
+						IEngineGraphics::instance()->QuadsBegin();
 						for(int i = 0; i < pLayer->m_lQuads.size(); i++)
 						{
 							for(int v = 0; v < 4; v++)
@@ -1467,11 +1467,11 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 
 							DoQuad(&pLayer->m_lQuads[i], i);
 						}
-						Graphics()->QuadsEnd();
+						IEngineGraphics::instance()->QuadsEnd();
 					}
 				}
 
-				Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+				IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 			}
 
 			// do panning
@@ -1512,8 +1512,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		CLayerGroup *g = m_Map.m_pGameGroup;
 		g->MapScreen();
 	
-		Graphics()->TextureSet(-1);
-		Graphics()->LinesBegin();
+		IEngineGraphics::instance()->TextureSet(-1);
+		IEngineGraphics::instance()->LinesBegin();
 
 			CUIRect r;
 			r.x = GetSelectedGroup()->m_ClipX;
@@ -1526,10 +1526,10 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 				IGraphics::CLineItem(r.x+r.w, r.y, r.x+r.w, r.y+r.h),
 				IGraphics::CLineItem(r.x+r.w, r.y+r.h, r.x, r.y+r.h),
 				IGraphics::CLineItem(r.x, r.y+r.h, r.x, r.y)};
-			Graphics()->SetColor(1,0,0,1);
-			Graphics()->LinesDraw(Array, 4);
+			IEngineGraphics::instance()->SetColor(1,0,0,1);
+			IEngineGraphics::instance()->LinesDraw(Array, 4);
 
-		Graphics()->LinesEnd();
+		IEngineGraphics::instance()->LinesEnd();
 	}
 
 	// render screen sizes
@@ -1538,8 +1538,8 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 		CLayerGroup *g = m_Map.m_pGameGroup;
 		g->MapScreen();
 
-		Graphics()->TextureSet(-1);
-		Graphics()->LinesBegin();
+		IEngineGraphics::instance()->TextureSet(-1);
+		IEngineGraphics::instance()->LinesBegin();
 
 		float aLastPoints[4];
 		float Start = 1.0f; //9.0f/16.0f;
@@ -1559,7 +1559,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 				IGraphics::CLineItem Array[2] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[2], aPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aPoints[2], aPoints[3])};
-				Graphics()->LinesDraw(Array, 2);
+				IEngineGraphics::instance()->LinesDraw(Array, 2);
 			}
 
 			if(i != 0)
@@ -1569,7 +1569,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aLastPoints[2], aLastPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aLastPoints[0], aLastPoints[3]),
 					IGraphics::CLineItem(aPoints[2], aPoints[3], aLastPoints[2], aLastPoints[3])};
-				Graphics()->LinesDraw(Array, 4);
+				IEngineGraphics::instance()->LinesDraw(Array, 4);
 			}
 
 			if(i == NumSteps)
@@ -1577,7 +1577,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 				IGraphics::CLineItem Array[2] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[0], aPoints[3]),
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aPoints[2], aPoints[3])};
-				Graphics()->LinesDraw(Array, 2);
+				IEngineGraphics::instance()->LinesDraw(Array, 2);
 			}
 
 			mem_copy(aLastPoints, aPoints, sizeof(aPoints));
@@ -1585,7 +1585,7 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 
 		if(1)
 		{
-			Graphics()->SetColor(1,0,0,1);
+			IEngineGraphics::instance()->SetColor(1,0,0,1);
 			for(int i = 0; i < 2; i++)
 			{
 				float aPoints[4];
@@ -1607,15 +1607,15 @@ void CEditor::DoMapEditor(CUIRect View, CUIRect ToolBar)
 					IGraphics::CLineItem(r.x+r.w, r.y, r.x+r.w, r.y+r.h),
 					IGraphics::CLineItem(r.x+r.w, r.y+r.h, r.x, r.y+r.h),
 					IGraphics::CLineItem(r.x, r.y+r.h, r.x, r.y)};
-				Graphics()->LinesDraw(Array, 4);
-				Graphics()->SetColor(0,1,0,1);
+				IEngineGraphics::instance()->LinesDraw(Array, 4);
+				IEngineGraphics::instance()->SetColor(0,1,0,1);
 			}
 		}
 
-		Graphics()->LinesEnd();
+		IEngineGraphics::instance()->LinesEnd();
 	}
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 	//UI()->ClipDisable();
 }
 
@@ -1907,16 +1907,16 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
 	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	if(!IEngineGraphics::instance()->LoadPNG(&ImgInfo, pFileName, StorageType))
 		return;
 
 	CEditorImage *pImg = pEditor->m_Map.m_lImages[pEditor->m_SelectedImage];
 	int External = pImg->m_External;
-	pEditor->Graphics()->UnloadTexture(pImg->m_TexID);
+	IEngineGraphics::instance()->UnloadTexture(pImg->m_TexID);
 	*pImg = ImgInfo;
 	pImg->m_External = External;
 	pEditor->ExtractName(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
-	pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+	pImg->m_TexID = IEngineGraphics::instance()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	pEditor->SortImages();
 	for(int i = 0; i < pEditor->m_Map.m_lImages.size(); ++i)
 	{
@@ -1930,7 +1930,7 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
 	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	if(!IEngineGraphics::instance()->LoadPNG(&ImgInfo, pFileName, StorageType))
 		return;
 
 	// check if we have that image already
@@ -1944,7 +1944,7 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 
 	CEditorImage *pImg = new CEditorImage(pEditor);
 	*pImg = ImgInfo;
-	pImg->m_TexID = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
+	pImg->m_TexID = IEngineGraphics::instance()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, 0);
 	pImg->m_External = 1;	// external by default
 	str_copy(pImg->m_aName, aBuf, sizeof(pImg->m_aName));
 	pEditor->m_Map.m_lImages.add(pImg);
@@ -2148,12 +2148,12 @@ void CEditor::RenderImages(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					r.w = r.h;
 				else
 					r.h = r.w;
-				Graphics()->TextureSet(m_Map.m_lImages[i]->m_TexID);
-				Graphics()->BlendNormal();
-				Graphics()->QuadsBegin();
+				IEngineGraphics::instance()->TextureSet(m_Map.m_lImages[i]->m_TexID);
+				IEngineGraphics::instance()->BlendNormal();
+				IEngineGraphics::instance()->QuadsBegin();
 				IGraphics::CQuadItem QuadItem(r.x, r.y, r.w, r.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-				Graphics()->QuadsEnd();
+				IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+				IEngineGraphics::instance()->QuadsEnd();
 
 			}
 		}
@@ -2210,12 +2210,12 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 	Button.VSplitLeft(Button.h, &FileIcon, &Button);
 	Button.VSplitLeft(5.0f, 0, &Button);
 
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_FILEICONS].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_FILEICONS].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	RenderTools()->SelectSprite(m_FileList[Index].m_IsDir?SPRITE_FILE_FOLDER:SPRITE_FILE_MAP2);
 	IGraphics::CQuadItem QuadItem(FileIcon.x, FileIcon.y, FileIcon.w, FileIcon.h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	if(DoButton_File((void*)(10+(int)Button.y), m_FileList[Index].m_aName, m_FilesSelectedIndex == Index, &Button, 0, 0))
 	{
@@ -2225,7 +2225,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 			m_aFileDialogFileName[0] = 0;
 		m_FilesSelectedIndex = Index;
 
-		if(Input()->MouseDoubleClick())
+		if(IEngineInput::instance()->MouseDoubleClick())
 			m_aFileDialogActivate = true;
 	}
 }
@@ -2233,7 +2233,7 @@ void CEditor::AddFileDialogEntry(int Index, CUIRect *pView)
 void CEditor::RenderFileDialog()
 {
 	// GUI coordsys
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 	CUIRect View = *UI()->Screen();
 	float Width = View.w, Height = View.h;
 
@@ -2281,9 +2281,9 @@ void CEditor::RenderFileDialog()
 	int ScrollNum = m_FileList.size()-Num+1;
 	if(ScrollNum > 0)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+		if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_UP))
 			m_FileDialogScrollValue -= 3.0f/ScrollNum;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 			m_FileDialogScrollValue += 3.0f/ScrollNum;
 	}
 	else
@@ -2291,13 +2291,13 @@ void CEditor::RenderFileDialog()
 
 	if(m_FilesSelectedIndex > -1)
 	{
-		for(int i = 0; i < Input()->NumEvents(); i++)
+		for(int i = 0; i < IEngineInput::instance()->NumEvents(); i++)
 		{
 			int NewIndex = -1;
-			if(Input()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
+			if(IEngineInput::instance()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
 			{
-				if(Input()->GetEvent(i).m_Key == KEY_DOWN) NewIndex = m_FilesSelectedIndex + 1;
-				if(Input()->GetEvent(i).m_Key == KEY_UP) NewIndex = m_FilesSelectedIndex - 1;
+				if(IEngineInput::instance()->GetEvent(i).m_Key == KEY_DOWN) NewIndex = m_FilesSelectedIndex + 1;
+				if(IEngineInput::instance()->GetEvent(i).m_Key == KEY_UP) NewIndex = m_FilesSelectedIndex - 1;
 			}
 			if(NewIndex > -1 && NewIndex < m_FileList.size())
 			{
@@ -2321,11 +2321,11 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	for(int i = 0; i < Input()->NumEvents(); i++)
+	for(int i = 0; i < IEngineInput::instance()->NumEvents(); i++)
 	{
-		if(Input()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
+		if(IEngineInput::instance()->GetEvent(i).m_Flags&IInput::FLAG_PRESS)
 		{
-			if(Input()->GetEvent(i).m_Key == KEY_RETURN || Input()->GetEvent(i).m_Key == KEY_KP_ENTER)
+			if(IEngineInput::instance()->GetEvent(i).m_Key == KEY_RETURN || IEngineInput::instance()->GetEvent(i).m_Key == KEY_KP_ENTER)
 				m_aFileDialogActivate = true;
 		}
 	}
@@ -2394,7 +2394,7 @@ void CEditor::RenderFileDialog()
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_aFileDialogFileName);
 			if(!str_comp(m_pFileDialogButtonText, "Save"))
 			{
-				IOHANDLE File = Storage()->OpenFile(m_aFileSaveName, IOFLAG_READ, IStorage::TYPE_SAVE);
+				IOHANDLE File = IStorage::instance()->OpenFile(m_aFileSaveName, IOFLAG_READ, IStorage::TYPE_SAVE);
 				if(File)
 				{
 					io_close(File);
@@ -2413,7 +2413,7 @@ void CEditor::RenderFileDialog()
 
 	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
-	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, 0) || Input()->KeyPressed(KEY_ESCAPE))
+	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, 0) || IEngineInput::instance()->KeyPressed(KEY_ESCAPE))
 		m_Dialog = DIALOG_NONE;
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
@@ -2444,7 +2444,7 @@ void CEditor::FilelistPopulate(int StorageType)
 		Item.m_StorageType = IStorage::TYPE_SAVE;
 		m_FileList.add(Item);
 	}
-	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
+	IStorage::instance()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	m_FilesSelectedIndex = m_FileList.size() ? 0 : -1;
 	m_aFileDialogActivate = false;
 }
@@ -2714,21 +2714,21 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// render lines
 		{
 			UI()->ClipEnable(&View);
-			Graphics()->TextureSet(-1);
-			Graphics()->LinesBegin();
+			IEngineGraphics::instance()->TextureSet(-1);
+			IEngineGraphics::instance()->LinesBegin();
 			for(int c = 0; c < pEnvelope->m_Channels; c++)
 			{
 				if(s_ActiveChannels&(1<<c))
-					Graphics()->SetColor(aColors[c].r,aColors[c].g,aColors[c].b,1);
+					IEngineGraphics::instance()->SetColor(aColors[c].r,aColors[c].g,aColors[c].b,1);
 				else
-					Graphics()->SetColor(aColors[c].r*0.5f,aColors[c].g*0.5f,aColors[c].b*0.5f,1);
+					IEngineGraphics::instance()->SetColor(aColors[c].r*0.5f,aColors[c].g*0.5f,aColors[c].b*0.5f,1);
 
 				float PrevX = 0;
 				float aResults[4];
 				pEnvelope->Eval(0.000001f, aResults);
 				float PrevValue = aResults[c];
 
-				int Steps = (int)((View.w/UI()->Screen()->w) * Graphics()->ScreenWidth());
+				int Steps = (int)((View.w/UI()->Screen()->w) * IEngineGraphics::instance()->ScreenWidth());
 				for(int i = 1; i <= Steps; i++)
 				{
 					float a = i/(float)Steps;
@@ -2737,12 +2737,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					v = (v-Bottom)/(Top-Bottom);
 
 					IGraphics::CLineItem LineItem(View.x + PrevX*View.w, View.y+View.h - PrevValue*View.h, View.x + a*View.w, View.y+View.h - v*View.h);
-					Graphics()->LinesDraw(&LineItem, 1);
+					IEngineGraphics::instance()->LinesDraw(&LineItem, 1);
 					PrevX = a;
 					PrevValue = v;
 				}
 			}
-			Graphics()->LinesEnd();
+			IEngineGraphics::instance()->LinesEnd();
 			UI()->ClipDisable();
 		}
 
@@ -2774,8 +2774,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// render colorbar
 		if(ShowColorBar)
 		{
-			Graphics()->TextureSet(-1);
-			Graphics()->QuadsBegin();
+			IEngineGraphics::instance()->TextureSet(-1);
+			IEngineGraphics::instance()->QuadsBegin();
 			for(int i = 0; i < pEnvelope->m_lPoints.size()-1; i++)
 			{
 				float r0 = fx2f(pEnvelope->m_lPoints[i].m_aValues[0]);
@@ -2791,7 +2791,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 													IGraphics::CColorVertex(1, r1, g1, b1, a1),
 													IGraphics::CColorVertex(2, r1, g1, b1, a1),
 													IGraphics::CColorVertex(3, r0, g0, b0, a0)};
-				Graphics()->SetColorVertex(Array, 4);
+				IEngineGraphics::instance()->SetColorVertex(Array, 4);
 
 				float x0 = pEnvelope->m_lPoints[i].m_Time/1000.0f/EndTime;
 //				float y0 = (fx2f(envelope->points[i].values[c])-bottom)/(top-bottom);
@@ -2804,9 +2804,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				v.h = ColorBar.h;
 
 				IGraphics::CQuadItem QuadItem(v.x, v.y, v.w, v.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 			}
-			Graphics()->QuadsEnd();
+			IEngineGraphics::instance()->QuadsEnd();
 		}
 
 		// render handles
@@ -2815,8 +2815,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			int CurrentValue = 0, CurrentTime = 0;
 
-			Graphics()->TextureSet(-1);
-			Graphics()->QuadsBegin();
+			IEngineGraphics::instance()->TextureSet(-1);
+			IEngineGraphics::instance()->QuadsBegin();
 			for(int c = 0; c < pEnvelope->m_Channels; c++)
 			{
 				if(!(s_ActiveChannels&(1<<c)))
@@ -2850,11 +2850,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						}
 						else
 						{							
-							if(Input()->KeyPressed(KEY_LSHIFT) || Input()->KeyPressed(KEY_RSHIFT))
+							if(IEngineInput::instance()->KeyPressed(KEY_LSHIFT) || IEngineInput::instance()->KeyPressed(KEY_RSHIFT))
 							{
 								if(i != 0)
 								{
-									if((Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)))
+									if((IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL)))
 										pEnvelope->m_lPoints[i].m_Time += (int)((m_MouseDeltaX));
 									else
 										pEnvelope->m_lPoints[i].m_Time += (int)((m_MouseDeltaX*TimeScale)*1000.0f);
@@ -2866,7 +2866,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							}
 							else
 							{
-								if((Input()->KeyPressed(KEY_LCTRL) || Input()->KeyPressed(KEY_RCTRL)))
+								if((IEngineInput::instance()->KeyPressed(KEY_LCTRL) || IEngineInput::instance()->KeyPressed(KEY_RCTRL)))
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY*0.001f);
 								else
 									pEnvelope->m_lPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY*ValueScale);
@@ -2875,7 +2875,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						}
 
 						ColorMod = 100.0f;
-						Graphics()->SetColor(1,1,1,1);
+						IEngineGraphics::instance()->SetColor(1,1,1,1);
 					}
 					else if(UI()->HotItem() == pID)
 					{
@@ -2894,7 +2894,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						}
 
 						ColorMod = 100.0f;
-						Graphics()->SetColor(1,0.75f,0.75f,1);
+						IEngineGraphics::instance()->SetColor(1,0.75f,0.75f,1);
 						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point aswell. Right click to delete.";
 					}
 
@@ -2904,12 +2904,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						CurrentValue = pEnvelope->m_lPoints[i].m_aValues[c];
 					}
 
-					Graphics()->SetColor(aColors[c].r*ColorMod, aColors[c].g*ColorMod, aColors[c].b*ColorMod, 1.0f);
+					IEngineGraphics::instance()->SetColor(aColors[c].r*ColorMod, aColors[c].g*ColorMod, aColors[c].b*ColorMod, 1.0f);
 					IGraphics::CQuadItem QuadItem(Final.x, Final.y, Final.w, Final.h);
-					Graphics()->QuadsDrawTL(&QuadItem, 1);
+					IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
 				}
 			}
-			Graphics()->QuadsEnd();
+			IEngineGraphics::instance()->QuadsEnd();
 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf),"%.3f %.3f", CurrentTime/1000.0f, fx2f(CurrentValue));
@@ -3036,9 +3036,9 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 void CEditor::Render()
 {
 	// basic start
-	Graphics()->Clear(1.0f, 0.0f, 1.0f);
+	IEngineGraphics::instance()->Clear(1.0f, 0.0f, 1.0f);
 	CUIRect View = *UI()->Screen();
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 
 	float Width = View.w;
 	float Height = View.h;
@@ -3107,7 +3107,7 @@ void CEditor::Render()
 	else if(m_Mode == MODE_IMAGES)
 		RenderImages(ToolBox, ToolBar, View);
 
-	Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+	IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 
 	if(m_GuiActive)
 	{
@@ -3141,18 +3141,18 @@ void CEditor::Render()
 	//
 	if(g_Config.m_EdShowkeys)
 	{
-		Graphics()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
+		IEngineGraphics::instance()->MapScreen(UI()->Screen()->x, UI()->Screen()->y, UI()->Screen()->w, UI()->Screen()->h);
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, View.x+10, View.y+View.h-24-10, 24.0f, TEXTFLAG_RENDER);
+		IEngineTextRender::instance()->SetCursor(&Cursor, View.x+10, View.y+View.h-24-10, 24.0f, TEXTFLAG_RENDER);
 
 		int NKeys = 0;
 		for(int i = 0; i < KEY_LAST; i++)
 		{
-			if(Input()->KeyPressed(i))
+			if(IEngineInput::instance()->KeyPressed(i))
 			{
 				if(NKeys)
-					TextRender()->TextEx(&Cursor, " + ", -1);
-				TextRender()->TextEx(&Cursor, Input()->KeyName(i), -1);
+					IEngineTextRender::instance()->TextEx(&Cursor, " + ", -1);
+				IEngineTextRender::instance()->TextEx(&Cursor, IEngineInput::instance()->KeyName(i), -1);
 				NKeys++;
 			}
 		}
@@ -3163,13 +3163,13 @@ void CEditor::Render()
 		// render butt ugly mouse cursor
 		float mx = UI()->MouseX();
 		float my = UI()->MouseY();
-		Graphics()->TextureSet(ms_CursorTexture);
-		Graphics()->QuadsBegin();
+		IEngineGraphics::instance()->TextureSet(ms_CursorTexture);
+		IEngineGraphics::instance()->QuadsBegin();
 		if(ms_pUiGotContext == UI()->HotItem())
-			Graphics()->SetColor(1,0,0,1);
+			IEngineGraphics::instance()->SetColor(1,0,0,1);
 		IGraphics::CQuadItem QuadItem(mx,my, 16.0f, 16.0f);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsEnd();
 	}
 
 }
@@ -3297,21 +3297,13 @@ void CEditorMap::CreateDefault(int EntitiesTexture)
 
 void CEditor::Init()
 {
-	m_pInput = Kernel()->RequestInterface<IInput>();
-	m_pClient = Kernel()->RequestInterface<IClient>();
-	m_pConsole = IConsole::instance();
-	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
-	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
-	m_pStorage = IStorage::instance();
-	m_RenderTools.m_pGraphics = m_pGraphics;
-	m_RenderTools.m_pUI = &m_UI;
-	m_UI.SetGraphics(m_pGraphics, m_pTextRender);
+	m_RenderTools.setUI(&m_UI);
 	m_Map.m_pEditor = this;
 
-	ms_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	ms_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	ms_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	ms_EntitiesTexture = Graphics()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_CheckerTexture = IEngineGraphics::instance()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_BackgroundTexture = IEngineGraphics::instance()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_CursorTexture = IEngineGraphics::instance()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	ms_EntitiesTexture = IEngineGraphics::instance()->LoadTexture("editor/entities.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	m_TilesetPicker.m_pEditor = this;
 	m_TilesetPicker.MakePalette();
@@ -3355,7 +3347,7 @@ void CEditor::UpdateAndRender()
 	float mx, my, Mwx, Mwy;
 	float rx, ry;
 	{
-		Input()->MouseRelative(&rx, &ry);
+		IEngineInput::instance()->MouseRelative(&rx, &ry);
 		m_MouseDeltaX = rx;
 		m_MouseDeltaY = ry;
 
@@ -3391,41 +3383,41 @@ void CEditor::UpdateAndRender()
 		}
 
 		int Buttons = 0;
-		if(Input()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
-		if(Input()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
-		if(Input()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_1)) Buttons |= 1;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_2)) Buttons |= 2;
+		if(IEngineInput::instance()->KeyPressed(KEY_MOUSE_3)) Buttons |= 4;
 
 		UI()->Update(mx,my,Mwx,Mwy,Buttons);
 	}
 
 	// toggle gui
-	if(Input()->KeyDown(KEY_TAB))
+	if(IEngineInput::instance()->KeyDown(KEY_TAB))
 		m_GuiActive = !m_GuiActive;
 
-	if(Input()->KeyDown(KEY_F5))
+	if(IEngineInput::instance()->KeyDown(KEY_F5))
 		Save("maps/debug_test2.map");
 
-	if(Input()->KeyDown(KEY_F6))
+	if(IEngineInput::instance()->KeyDown(KEY_F6))
 		Load("maps/debug_test2.map", IStorage::TYPE_ALL);
 	
-	if(Input()->KeyDown(KEY_F8))
+	if(IEngineInput::instance()->KeyDown(KEY_F8))
 		Load("maps/debug_test.map", IStorage::TYPE_ALL);
 	
-	if(Input()->KeyDown(KEY_F7))
+	if(IEngineInput::instance()->KeyDown(KEY_F7))
 		Save("maps/quicksave.map");
 
-	if(Input()->KeyDown(KEY_F10))
+	if(IEngineInput::instance()->KeyDown(KEY_F10))
 		m_ShowMousePointer = false;
 
 	Render();
 
-	if(Input()->KeyDown(KEY_F10))
+	if(IEngineInput::instance()->KeyDown(KEY_F10))
 	{
-		Graphics()->TakeScreenshot(0);
+		IEngineGraphics::instance()->TakeScreenshot(0);
 		m_ShowMousePointer = true;
 	}
 
-	Input()->ClearEvents();
+	IEngineInput::instance()->ClearEvents();
 }
 
 IEditor *CreateEditor() { return new CEditor; }

@@ -34,8 +34,8 @@ void CMapLayers::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *p
 {
 	float Points[4];
 	RenderTools()->MapscreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX/100.0f, pGroup->m_ParallaxY/100.0f,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), 1.0f, Points);
-	Graphics()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
+		pGroup->m_OffsetX, pGroup->m_OffsetY, IEngineGraphics::instance()->ScreenAspect(), 1.0f, Points);
+	IEngineGraphics::instance()->MapScreen(Points[0], Points[1], Points[2], Points[3]);
 }
 
 void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void *pUser)
@@ -50,43 +50,43 @@ void CMapLayers::EnvelopeEval(float TimeOffset, int Env, float *pChannels, void 
 
 	{
 		int Start, Num;
-		pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
+		IEngineMap::instance()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
 		if(Num)
-			pPoints = (CEnvPoint *)pThis->m_pLayers->Map()->GetItem(Start, 0, 0);
+			pPoints = (CEnvPoint *)IEngineMap::instance()->GetItem(Start, 0, 0);
 	}
 
 	int Start, Num;
-	pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
+	IEngineMap::instance()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
 
 	if(Env >= Num)
 		return;
 
-	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start+Env, 0, 0);
+	CMapItemEnvelope *pItem = (CMapItemEnvelope *)IEngineMap::instance()->GetItem(Start+Env, 0, 0);
 
-	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
+		const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 		static float Time = 0;
-		static float LastLocalTime = pThis->Client()->LocalTime();
+		static float LastLocalTime = IClient::instance()->LocalTime();
 
 		if(!pInfo->m_Paused)
-			Time += (pThis->Client()->LocalTime()-LastLocalTime)*pInfo->m_Speed;
+			Time += (IClient::instance()->LocalTime()-LastLocalTime)*pInfo->m_Speed;
 
 		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, Time+TimeOffset, pChannels);
 
-		LastLocalTime = pThis->Client()->LocalTime();
+		LastLocalTime = IClient::instance()->LocalTime();
 	}
 	else
-		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, pThis->Client()->LocalTime()+TimeOffset, pChannels);
+		pThis->RenderTools()->RenderEvalEnvelope(pPoints+pItem->m_StartPoint, pItem->m_NumPoints, 4, IClient::instance()->LocalTime()+TimeOffset, pChannels);
 }
 
 void CMapLayers::OnRender()
 {
-	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() != IClient::STATE_ONLINE && IClient::instance()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	CUIRect Screen;
-	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
+	IEngineGraphics::instance()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
 	vec2 Center = m_pClient->m_pCamera->m_Center;
 	//float center_x = gameclient.camera->center.x;
@@ -103,14 +103,14 @@ void CMapLayers::OnRender()
 			// set clipping
 			float Points[4];
 			MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup());
-			Graphics()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
+			IEngineGraphics::instance()->GetScreen(&Points[0], &Points[1], &Points[2], &Points[3]);
 			float x0 = (pGroup->m_ClipX - Points[0]) / (Points[2]-Points[0]);
 			float y0 = (pGroup->m_ClipY - Points[1]) / (Points[3]-Points[1]);
 			float x1 = ((pGroup->m_ClipX+pGroup->m_ClipW) - Points[0]) / (Points[2]-Points[0]);
 			float y1 = ((pGroup->m_ClipY+pGroup->m_ClipH) - Points[1]) / (Points[3]-Points[1]);
 
-			Graphics()->ClipEnable((int)(x0*Graphics()->ScreenWidth()), (int)(y0*Graphics()->ScreenHeight()),
-				(int)((x1-x0)*Graphics()->ScreenWidth()), (int)((y1-y0)*Graphics()->ScreenHeight()));
+			IEngineGraphics::instance()->ClipEnable((int)(x0*IEngineGraphics::instance()->ScreenWidth()), (int)(y0*IEngineGraphics::instance()->ScreenHeight()),
+				(int)((x1-x0)*IEngineGraphics::instance()->ScreenWidth()), (int)((y1-y0)*IEngineGraphics::instance()->ScreenHeight()));
 		}
 
 		MapScreenToGroup(Center.x, Center.y, pGroup);
@@ -145,15 +145,15 @@ void CMapLayers::OnRender()
 					Render = true;
 			}
 
-			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->KeyPressed(KEY_LCTRL) && Input()->KeyPressed(KEY_LSHIFT) && Input()->KeyDown(KEY_KP0))
+			if(Render && pLayer->m_Type == LAYERTYPE_TILES && IEngineInput::instance()->KeyPressed(KEY_LCTRL) && IEngineInput::instance()->KeyPressed(KEY_LSHIFT) && IEngineInput::instance()->KeyDown(KEY_KP0))
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
+				CTile *pTiles = (CTile *)IEngineMap::instance()->GetData(pTMap->m_Data);
 				CServerInfo CurrentServerInfo;
-				Client()->GetServerInfo(&CurrentServerInfo);
+				IClient::instance()->GetServerInfo(&CurrentServerInfo);
 				char aFilename[256];
 				str_format(aFilename, sizeof(aFilename), "dumps/tilelayer_dump_%s-%d-%d-%dx%d.txt", CurrentServerInfo.m_aMap, g, l, pTMap->m_Width, pTMap->m_Height);
-				IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+				IOHANDLE File = IStorage::instance()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 				if(File)
 				{
 					#if defined(CONF_FAMILY_WINDOWS)
@@ -179,30 +179,30 @@ void CMapLayers::OnRender()
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 					if(pTMap->m_Image == -1)
-						Graphics()->TextureSet(-1);
+						IEngineGraphics::instance()->TextureSet(-1);
 					else
-						Graphics()->TextureSet(m_pClient->m_pMapimages->Get(pTMap->m_Image));
+						IEngineGraphics::instance()->TextureSet(m_pClient->m_pMapimages->Get(pTMap->m_Image));
 
-					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
-					Graphics()->BlendNone();
+					CTile *pTiles = (CTile *)IEngineMap::instance()->GetData(pTMap->m_Data);
+					IEngineGraphics::instance()->BlendNone();
 					vec4 Color = vec4(pTMap->m_Color.r/255.0f, pTMap->m_Color.g/255.0f, pTMap->m_Color.b/255.0f, pTMap->m_Color.a/255.0f);
 					RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_OPAQUE);
-					Graphics()->BlendNormal();
+					IEngineGraphics::instance()->BlendNormal();
 					RenderTools()->RenderTilemap(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND|LAYERRENDERFLAG_TRANSPARENT);
 				}
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 					if(pQLayer->m_Image == -1)
-						Graphics()->TextureSet(-1);
+						IEngineGraphics::instance()->TextureSet(-1);
 					else
-						Graphics()->TextureSet(m_pClient->m_pMapimages->Get(pQLayer->m_Image));
+						IEngineGraphics::instance()->TextureSet(m_pClient->m_pMapimages->Get(pQLayer->m_Image));
 
-					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
+					CQuad *pQuads = (CQuad *)IEngineMap::instance()->GetDataSwapped(pQLayer->m_Data);
 
-					Graphics()->BlendNone();
+					IEngineGraphics::instance()->BlendNone();
 					RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_OPAQUE, EnvelopeEval, this);
-					Graphics()->BlendNormal();
+					IEngineGraphics::instance()->BlendNormal();
 					RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this);
 				}
 
@@ -210,13 +210,13 @@ void CMapLayers::OnRender()
 			}
 		}
 		if(!g_Config.m_GfxNoclip)
-			Graphics()->ClipDisable();
+			IEngineGraphics::instance()->ClipDisable();
 	}
 
 	if(!g_Config.m_GfxNoclip)
-		Graphics()->ClipDisable();
+		IEngineGraphics::instance()->ClipDisable();
 
 	// reset the screen like it was before
-	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+	IEngineGraphics::instance()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 }
 

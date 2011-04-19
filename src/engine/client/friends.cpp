@@ -27,16 +27,11 @@ void CFriends::ConRemoveFriend(IConsole::IResult *pResult, void *pUserData)
 
 void CFriends::Init()
 {
-	IConfig *pConfig = Kernel()->RequestInterface<IConfig>();
-	if(pConfig)
-		pConfig->RegisterCallback(ConfigSaveCallback, this);
+	IConfig::instance()->RegisterCallback(ConfigSaveCallback, this);
 
-	boost::shared_ptr < IConsole > pConsole = IConsole::instance();
-	if(pConsole)
-	{
-		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
-		pConsole->Register("remove_Friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
-	}
+	IConsole::instance()->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
+	IConsole::instance()->Register("remove_Friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
+	
 }
 
 const CFriendInfo *CFriends::GetFriend(int Index) const

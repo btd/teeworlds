@@ -24,7 +24,7 @@ static int LoadSoundsThread(void *pUser)
 	{
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
-			int Id = pData->m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
+			int Id = IEngineSound::instance()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 		}
 
@@ -37,12 +37,12 @@ static int LoadSoundsThread(void *pUser)
 void CSounds::OnInit()
 {
 	// setup sound channels
-	Sound()->SetChannel(CSounds::CHN_GUI, 1.0f, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MUSIC, 1.0f, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_GLOBAL, 1.0f, 0.0f);
+	IEngineSound::instance()->SetChannel(CSounds::CHN_GUI, 1.0f, 0.0f);
+	IEngineSound::instance()->SetChannel(CSounds::CHN_MUSIC, 1.0f, 0.0f);
+	IEngineSound::instance()->SetChannel(CSounds::CHN_WORLD, 0.9f, 1.0f);
+	IEngineSound::instance()->SetChannel(CSounds::CHN_GLOBAL, 1.0f, 0.0f);
 
-	Sound()->SetListenerPos(0.0f, 0.0f);
+	IEngineSound::instance()->SetListenerPos(0.0f, 0.0f);
 
 	ClearQueue();
 
@@ -51,7 +51,7 @@ void CSounds::OnInit()
 	{
 		g_UserData.m_pGameClient = m_pClient;
 		g_UserData.m_Render = false;
-		m_pClient->Engine()->AddJob(&m_SoundJob, LoadSoundsThread, &g_UserData);
+		IEngine::instance()->AddJob(&m_SoundJob, LoadSoundsThread, &g_UserData);
 		m_WaitForSoundJob = true;
 	}
 	else
@@ -65,7 +65,7 @@ void CSounds::OnInit()
 
 void CSounds::OnReset()
 {
-	Sound()->StopAll();
+	IEngineSound::instance()->StopAll();
 	ClearQueue();
 }
 
@@ -81,7 +81,7 @@ void CSounds::OnRender()
 	}
 
 	// set listner pos
-	Sound()->SetListenerPos(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y);
+	IEngineSound::instance()->SetListenerPos(m_pClient->m_pCamera->m_Center.x, m_pClient->m_pCamera->m_Center.y);
 
 	// play sound from queue
 	if(m_QueuePos > 0)
@@ -121,7 +121,7 @@ void CSounds::PlayAndRecord(int Chn, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundID = SetId;
-	Client()->SendPackMsg(&Msg, MSGFLAG_NOSEND|MSGFLAG_RECORD);
+	IClient::instance()->SendPackMsg(&Msg, MSGFLAG_NOSEND|MSGFLAG_RECORD);
 
 	Play(Chn, SetId, Vol, Pos);
 }
@@ -142,7 +142,7 @@ void CSounds::Play(int Chn, int SetId, float Vol, vec2 Pos)
 
 	if(pSet->m_NumSounds == 1)
 	{
-		Sound()->PlayAt(Chn, pSet->m_aSounds[0].m_Id, Flags, Pos.x, Pos.y);
+		IEngineSound::instance()->PlayAt(Chn, pSet->m_aSounds[0].m_Id, Flags, Pos.x, Pos.y);
 		return;
 	}
 
@@ -153,7 +153,7 @@ void CSounds::Play(int Chn, int SetId, float Vol, vec2 Pos)
 		Id = rand() % pSet->m_NumSounds;
 	}
 	while(Id == pSet->m_Last);
-	Sound()->PlayAt(Chn, pSet->m_aSounds[Id].m_Id, Flags, Pos.x, Pos.y);
+	IEngineSound::instance()->PlayAt(Chn, pSet->m_aSounds[Id].m_Id, Flags, Pos.x, Pos.y);
 	pSet->m_Last = Id;
 }
 
@@ -165,5 +165,5 @@ void CSounds::Stop(int SetId)
 	SOUNDSET *pSet = &g_pData->m_aSounds[SetId];
 	
 	for(int i = 0; i < pSet->m_NumSounds; i++)
-		Sound()->Stop(pSet->m_aSounds[i].m_Id);
+		IEngineSound::instance()->Stop(pSet->m_aSounds[i].m_Id);
 }

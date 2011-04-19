@@ -20,15 +20,15 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
 	CImageInfo Info;
-	if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
+	if(!IEngineGraphics::instance()->LoadPNG(&Info, aBuf, DirType))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 		return 0;
 	}
 
 	CSkin Skin;
-	Skin.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	Skin.m_OrgTexture = IEngineGraphics::instance()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 	int BodySize = 96; // body size
 	unsigned char *d = (unsigned char *)Info.m_pData;
@@ -98,13 +98,13 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 			d[y*Pitch+x*4+2] = v;
 		}
 
-	Skin.m_ColorTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	Skin.m_ColorTexture = IEngineGraphics::instance()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 	mem_free(Info.m_pData);
 
 	// set skin data
 	str_copy(Skin.m_aName, pName, min((int)sizeof(Skin.m_aName),l-3));
 	str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.m_aName);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+	IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
 	pSelf->m_aSkins.add(Skin);
 
 	return 0;
@@ -115,10 +115,10 @@ void CSkins::OnInit()
 {
 	// load skins
 	m_aSkins.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
+	IStorage::instance()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, this);
 	if(!m_aSkins.size())
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
+		IConsole::instance()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
 		CSkin DummySkin;
 		DummySkin.m_OrgTexture = -1;
 		DummySkin.m_ColorTexture = -1;

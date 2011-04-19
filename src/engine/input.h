@@ -7,9 +7,9 @@
 
 extern const char g_aaKeyStrings[512][16];
 
-class IInput : public IInterface
+class IInput 
 {
-	MACRO_INTERFACE("input", 0)
+	
 public:
 	class CEvent
 	{
@@ -80,7 +80,7 @@ public:
 
 class IEngineInput : public IInput
 {
-	MACRO_INTERFACE("engineinput", 0)
+	SINGLETON_DEFAULT_DEF(IEngineInput)
 public:
 	virtual void Init() = 0;
 	virtual int Update() = 0;

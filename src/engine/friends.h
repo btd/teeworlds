@@ -13,9 +13,9 @@ struct CFriendInfo
 	char m_aClan[MAX_CLAN_LENGTH];
 };
 
-class IFriends : public IInterface
+class IFriends
 {
-	MACRO_INTERFACE("friends", 0)
+	SINGLETON_DEFAULT_DEF(IFriends)
 public:
 	enum
 	{

@@ -32,29 +32,29 @@ void CMotd::OnRender()
 	if(!IsActive())
 		return;
 
-	float Width = 400*3.0f*Graphics()->ScreenAspect();
+	float Width = 400*3.0f*IEngineGraphics::instance()->ScreenAspect();
 	float Height = 400*3.0f;
 
-	Graphics()->MapScreen(0, 0, Width, Height);
+	IEngineGraphics::instance()->MapScreen(0, 0, Width, Height);
 
 	float h = 800.0f;
 	float w = 650.0f;
 	float x = Width/2 - w/2;
 	float y = 150.0f;
 
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 40.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
-	TextRender()->Text(0, x+40.0f, y+40.0f, 32.0f, m_aServerMotd, (int)(w-80.0f));
+	IEngineTextRender::instance()->Text(0, x+40.0f, y+40.0f, 32.0f, m_aServerMotd, (int)(w-80.0f));
 }
 
 void CMotd::OnMessage(int MsgType, void *pRawMsg)
 {
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	if(MsgType == NETMSGTYPE_SV_MOTD)

@@ -331,7 +331,7 @@ void CConsole::ExecuteFile(const char *pFilename)
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
 			return;
 	
-	m_pStorage = IStorage::instance();
+	boost::shared_ptr <IStorage> m_pStorage = IStorage::instance();
 
 	// push this one to the stack
 	CExecFile ThisFile;

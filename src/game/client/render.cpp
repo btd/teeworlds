@@ -23,7 +23,7 @@ static void layershot_begin()
 	if(!config.cl_layershot)
 		return;
 
-	Graphics()->Clear(0,0,0);
+	IEngineGraphics::instance()->Clear(0,0,0);
 }
 
 static void layershot_end()
@@ -36,6 +36,10 @@ static void layershot_end()
 	gfx_screenshot_direct(buf);
 	config.cl_layershot++;
 }*/
+
+void CRenderTools::setUI(CUI * ui) {
+    m_pUI = ui;
+}
 
 void CRenderTools::SelectSprite(SPRITE *pSpr, int Flags, int sx, int sy)
 {
@@ -70,7 +74,7 @@ void CRenderTools::SelectSprite(SPRITE *pSpr, int Flags, int sx, int sy)
 		x2 = Temp;
 	}
 
-	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
+	IEngineGraphics::instance()->QuadsSetSubset(x1, y1, x2, y2);
 }
 
 void CRenderTools::SelectSprite(int Id, int Flags, int sx, int sy)
@@ -83,7 +87,7 @@ void CRenderTools::SelectSprite(int Id, int Flags, int sx, int sy)
 void CRenderTools::DrawSprite(float x, float y, float Size)
 {
 	IGraphics::CQuadItem QuadItem(x, y, Size*gs_SpriteWScale, Size*gs_SpriteHScale);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 }
 
 void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r, int Corners)
@@ -131,7 +135,7 @@ void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r,
 			x+w-r+Ca3*r, y+h-r+Sa3*r,
 			x+w-r+Ca2*r, y+h-r+Sa2*r);
 	}
-	Graphics()->QuadsDrawFreeform(ArrayF, NumItems);
+	IEngineGraphics::instance()->QuadsDrawFreeform(ArrayF, NumItems);
 
 	IGraphics::CQuadItem ArrayQ[9];
 	NumItems = 0;
@@ -146,7 +150,7 @@ void CRenderTools::DrawRoundRectExt(float x, float y, float w, float h, float r,
 	if(!(Corners&4)) ArrayQ[NumItems++] = IGraphics::CQuadItem(x, y+h, r, -r); // BL
 	if(!(Corners&8)) ArrayQ[NumItems++] = IGraphics::CQuadItem(x+w, y+h, -r, -r); // BR
 
-	Graphics()->QuadsDrawTL(ArrayQ, NumItems);
+	IEngineGraphics::instance()->QuadsDrawTL(ArrayQ, NumItems);
 }
 
 void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
@@ -156,13 +160,13 @@ void CRenderTools::DrawRoundRect(float x, float y, float w, float h, float r)
 
 void CRenderTools::DrawUIRect(const CUIRect *r, vec4 Color, int Corners, float Rounding)
 {
-	Graphics()->TextureSet(-1);
+	IEngineGraphics::instance()->TextureSet(-1);
 
 	// TODO: FIX US
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(Color.r, Color.g, Color.b, Color.a);
 	DrawRoundRectExt(r->x,r->y,r->w,r->h,Rounding*UI()->Scale(), Corners);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 }
 
 void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos)
@@ -170,12 +174,12 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
 
-	//Graphics()->TextureSet(data->images[IMAGE_CHAR_DEFAULT].id);
-	Graphics()->TextureSet(pInfo->m_Texture);
+	//IEngineGraphics::instance()->TextureSet(data->images[IMAGE_CHAR_DEFAULT].id);
+	IEngineGraphics::instance()->TextureSet(pInfo->m_Texture);
 
 	// TODO: FIX ME
-	Graphics()->QuadsBegin();
-	//Graphics()->QuadsDraw(pos.x, pos.y-128, 128, 128);
+	IEngineGraphics::instance()->QuadsBegin();
+	//IEngineGraphics::instance()->QuadsDraw(pos.x, pos.y-128, 128, 128);
 
 	// first pass we draw the outline
 	// second pass we draw the filling
@@ -189,14 +193,14 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float BaseSize = pInfo->m_Size;
 			if(f == 1)
 			{
-				Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle*pi*2);
+				IEngineGraphics::instance()->QuadsSetRotation(pAnim->GetBody()->m_Angle*pi*2);
 
 				// draw body
-				Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
+				IEngineGraphics::instance()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, pInfo->m_ColorBody.a);
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y)*AnimScale;
 				SelectSprite(OutLine?SPRITE_TEE_BODY_OUTLINE:SPRITE_TEE_BODY, 0, 0, 0);
 				IGraphics::CQuadItem QuadItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
-				Graphics()->QuadsDraw(&QuadItem, 1);
+				IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 
 				// draw eyes
 				if(p == 1)
@@ -227,7 +231,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					IGraphics::CQuadItem Array[2] = {
 						IGraphics::CQuadItem(BodyPos.x-EyeSeparation+Offset.x, BodyPos.y+Offset.y, EyeScale, h),
 						IGraphics::CQuadItem(BodyPos.x+EyeSeparation+Offset.x, BodyPos.y+Offset.y, -EyeScale, h)};
-					Graphics()->QuadsDraw(Array, 2);
+					IEngineGraphics::instance()->QuadsDraw(Array, 2);
 				}
 			}
 
@@ -237,7 +241,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float w = BaseSize;
 			float h = BaseSize/2;
 
-			Graphics()->QuadsSetRotation(pFoot->m_Angle*pi*2);
+			IEngineGraphics::instance()->QuadsSetRotation(pFoot->m_Angle*pi*2);
 
 			bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
 			float cs = 1.0f; // color scale
@@ -251,13 +255,13 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					cs = 0.5f;
 			}
 
-			Graphics()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, pInfo->m_ColorFeet.a);
+			IEngineGraphics::instance()->SetColor(pInfo->m_ColorFeet.r*cs, pInfo->m_ColorFeet.g*cs, pInfo->m_ColorFeet.b*cs, pInfo->m_ColorFeet.a);
 			IGraphics::CQuadItem QuadItem(Position.x+pFoot->m_X*AnimScale, Position.y+pFoot->m_Y*AnimScale, w, h);
-			Graphics()->QuadsDraw(&QuadItem, 1);
+			IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 		}
 	}
 
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 
 }
@@ -311,7 +315,7 @@ void CRenderTools::RenderTilemapGenerateSkip(class CLayers *pLayers)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTmap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)pLayers->Map()->GetData(pTmap->m_Data);
+				CTile *pTiles = (CTile *)IEngineMap::instance()->GetData(pTmap->m_Data);
 				for(int y = 0; y < pTmap->m_Height; y++)
 				{
 					for(int x = 1; x < pTmap->m_Width; x++)

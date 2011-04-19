@@ -46,23 +46,23 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 
 void CDamageInd::OnRender()
 {
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	for(int i = 0; i < m_NumItems;)
 	{
 		vec2 Pos = mix(m_aItems[i].m_Pos+m_aItems[i].m_Dir*75.0f, m_aItems[i].m_Pos, clamp((m_aItems[i].m_Life-0.60f)/0.15f, 0.0f, 1.0f));
 
-		m_aItems[i].m_Life -= Client()->FrameTime();
+		m_aItems[i].m_Life -= IClient::instance()->FrameTime();
 		if(m_aItems[i].m_Life < 0.0f)
 			DestroyI(&m_aItems[i]);
 		else
 		{
-			Graphics()->SetColor(1.0f,1.0f,1.0f, m_aItems[i].m_Life/0.1f);
-			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_Life * 2.0f);
+			IEngineGraphics::instance()->SetColor(1.0f,1.0f,1.0f, m_aItems[i].m_Life/0.1f);
+			IEngineGraphics::instance()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_Life * 2.0f);
 			RenderTools()->SelectSprite(SPRITE_STAR1);
 			RenderTools()->DrawSprite(Pos.x, Pos.y, 48.0f);
 			i++;
 		}
 	}
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 }

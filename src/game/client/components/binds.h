@@ -15,7 +15,7 @@ class CBinds : public CComponent
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpBinds(IConsole::IResult *pResult, void *pUserData);
-	boost::shared_ptr<IConsole> GetConsole() const { return Console(); }//TODO
+	
 
 	static void ConfigSaveCallback(class IConfig *pConfig, void *pUserData);
 

@@ -37,9 +37,9 @@ void CParticles::OnReset()
 
 void CParticles::Add(int Group, CParticle *pPart)
 {
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 		if(pInfo->m_Paused)
 			return;
 	}
@@ -129,15 +129,15 @@ void CParticles::Update(float TimePassed)
 
 void CParticles::OnRender()
 {
-	if(Client()->State() < IClient::STATE_ONLINE)
+	if(IClient::instance()->State() < IClient::STATE_ONLINE)
 		return;
 
 	static int64 LastTime = 0;
 	int64 t = time_get();
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(IClient::instance()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 		if(!pInfo->m_Paused)
 			Update((float)((t-LastTime)/(double)time_freq())*pInfo->m_Speed);
 	}
@@ -149,10 +149,10 @@ void CParticles::OnRender()
 
 void CParticles::RenderGroup(int Group)
 {
-	Graphics()->BlendNormal();
+	IEngineGraphics::instance()->BlendNormal();
 	//gfx_blend_additive();
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_PARTICLES].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 
 	int i = m_aFirstPart[Group];
 	while(i != -1)
@@ -162,19 +162,19 @@ void CParticles::RenderGroup(int Group)
 		vec2 p = m_aParticles[i].m_Pos;
 		float Size = mix(m_aParticles[i].m_StartSize, m_aParticles[i].m_EndSize, a);
 
-		Graphics()->QuadsSetRotation(m_aParticles[i].m_Rot);
+		IEngineGraphics::instance()->QuadsSetRotation(m_aParticles[i].m_Rot);
 
-		Graphics()->SetColor(
+		IEngineGraphics::instance()->SetColor(
 			m_aParticles[i].m_Color.r,
 			m_aParticles[i].m_Color.g,
 			m_aParticles[i].m_Color.b,
 			m_aParticles[i].m_Color.a); // pow(a, 0.75f) *
 
 		IGraphics::CQuadItem QuadItem(p.x, p.y, Size, Size);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsDraw(&QuadItem, 1);
 
 		i = m_aParticles[i].m_NextPart;
 	}
-	Graphics()->QuadsEnd();
-	Graphics()->BlendNormal();
+	IEngineGraphics::instance()->QuadsEnd();
+	IEngineGraphics::instance()->BlendNormal();
 }

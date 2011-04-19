@@ -8,7 +8,7 @@
 class CSound : public IEngineSound
 {
 public:
-	IEngineGraphics *m_pGraphics;
+	boost::shared_ptr< IEngineGraphics > m_pGraphics;
 	boost::shared_ptr< IStorage > m_pStorage;
 
 	virtual int Init();

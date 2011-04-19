@@ -9,12 +9,10 @@
 
 class IStorage
 {
-	static boost::shared_ptr< IStorage > g_instance;
-	static bool g_inited;
+    SINGLETON_DEFAULT_DEF(IStorage)
+	SINGLETON_SET_DEF(IStorage)
 	
 public:
-    static boost::shared_ptr< IStorage > instance();
-    static void set(IStorage * pStorage);
 
 	enum
 	{

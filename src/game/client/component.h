@@ -14,19 +14,8 @@ protected:
 	CGameClient *m_pClient;
 
 	// perhaps propagte pointers for these as well
-	class IKernel *Kernel() const { return m_pClient->Kernel(); }
-	class IGraphics *Graphics() const { return m_pClient->Graphics(); }
-	class ITextRender *TextRender() const { return m_pClient->TextRender(); }
-	class IClient *Client() const { return m_pClient->Client(); }
-	class IInput *Input() const { return m_pClient->Input(); }
-	boost::shared_ptr<IStorage> Storage() const { return m_pClient->Storage(); }
 	class CUI *UI() const { return m_pClient->UI(); }
-	class ISound *Sound() const { return m_pClient->Sound(); }
 	class CRenderTools *RenderTools() const { return m_pClient->RenderTools(); }
-	boost::shared_ptr<IConsole> Console() const { return m_pClient->Console(); }
-	class IDemoPlayer *DemoPlayer() const { return m_pClient->DemoPlayer(); }
-	class IDemoRecorder *DemoRecorder() const { return m_pClient->DemoRecorder(); }
-	class IServerBrowser *ServerBrowser() const { return m_pClient->ServerBrowser(); }
 	class CLayers *Layers() const { return m_pClient->Layers(); }
 	class CCollision *Collision() const { return m_pClient->Collision(); }
 public:

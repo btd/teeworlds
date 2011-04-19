@@ -15,9 +15,10 @@ public:
 	NETADDR m_Addr;
 };
 
-class IEngine : public IInterface
+class IEngine 
 {
-	MACRO_INTERFACE("engine", 0)
+	SINGLETON_DEFAULT_DEF(IEngine)
+	SINGLETON_SET_DEF(IEngine)
 
 protected:
 	class CJobPool m_JobPool;

@@ -5,9 +5,8 @@
 
 #include "kernel.h"
 
-class ISound : public IInterface
+class ISound 
 {
-	MACRO_INTERFACE("sound", 0)
 public:
 	enum
 	{
@@ -30,7 +29,7 @@ public:
 
 class IEngineSound : public ISound
 {
-	MACRO_INTERFACE("enginesound", 0)
+	SINGLETON_DEFAULT_DEF(IEngineSound)
 public:
 	virtual int Init() = 0;
 	virtual int Update() = 0;

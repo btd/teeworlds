@@ -40,7 +40,6 @@ class CConsole : public IConsole
 	};
 
 	CExecFile *m_pFirstExec;
-	boost::shared_ptr < IStorage > m_pStorage;
 
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);

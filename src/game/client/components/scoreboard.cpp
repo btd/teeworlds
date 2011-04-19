@@ -40,19 +40,19 @@ void CScoreboard::OnRelease()
 
 void CScoreboard::OnConsoleInit()
 {
-	Console()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
+	IConsole::instance()->Register("+scoreboard", "", CFGFLAG_CLIENT, ConKeyScoreboard, this, "Show scoreboard");
 }
 
 void CScoreboard::RenderGoals(float x, float y, float w)
 {
 	float h = 50.0f;
 
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// render goals
 	y += 10.0f;
@@ -62,20 +62,20 @@ void CScoreboard::RenderGoals(float x, float y, float w)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit);
-			TextRender()->Text(0, x+10.0f, y, 20.0f, aBuf, -1);
+			IEngineTextRender::instance()->Text(0, x+10.0f, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit);
-			TextRender()->Text(0, x+230.0f, y, 20.0f, aBuf, -1);
+			IEngineTextRender::instance()->Text(0, x+230.0f, y, 20.0f, aBuf, -1);
 		}
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum && m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s %d/%d", Localize("Round"), m_pClient->m_Snap.m_pGameInfoObj->m_RoundCurrent, m_pClient->m_Snap.m_pGameInfoObj->m_RoundNum);
-			float tw = TextRender()->TextWidth(0, 20.0f, aBuf, -1);
-			TextRender()->Text(0, x+w-tw-10.0f, y, 20.0f, aBuf, -1);
+			float tw = IEngineTextRender::instance()->TextWidth(0, 20.0f, aBuf, -1);
+			IEngineTextRender::instance()->Text(0, x+w-tw-10.0f, y, 20.0f, aBuf, -1);
 		}
 	}
 }
@@ -85,16 +85,16 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 	float h = 140.0f;
 
 	// background
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0,0,0,0.5f);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0,0,0,0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 10.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// Headline
 	y += 10.0f;
-	TextRender()->Text(0, x+10.0f, y, 28.0f, Localize("Spectators"), w-20.0f);
+	IEngineTextRender::instance()->Text(0, x+10.0f, y, 28.0f, Localize("Spectators"), w-20.0f);
 
 	// spectator names
 	y += 30.0f;
@@ -113,10 +113,10 @@ void CScoreboard::RenderSpectators(float x, float y, float w)
 		Multiple = true;
 	}
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, x+10.0f, y, 22.0f, TEXTFLAG_RENDER);
+	IEngineTextRender::instance()->SetCursor(&Cursor, x+10.0f, y, 22.0f, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = w-20.0f;
 	Cursor.m_MaxLines = 4;
-	TextRender()->TextEx(&Cursor, aBuffer, -1);
+	IEngineTextRender::instance()->TextEx(&Cursor, aBuffer, -1);
 }
 
 void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const char *pTitle)
@@ -127,12 +127,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	float h = 760.0f;
 
 	// background
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0.0f, 0.0f, 0.0f, 0.5f);
 	RenderTools()->DrawRoundRect(x, y, w, h, 17.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	// render title
 	float TitleFontsize = 40.0f;
@@ -143,7 +143,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			pTitle = Localize("Score board");
 	}
-	TextRender()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
+	IEngineTextRender::instance()->Text(0, x+20.0f, y, TitleFontsize, pTitle, -1);
 
 	char aBuf[128] = {0};
 	if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_TEAMS)
@@ -168,8 +168,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 	}
-	float tw = TextRender()->TextWidth(0, TitleFontsize, aBuf, -1);
-	TextRender()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
+	float tw = IEngineTextRender::instance()->TextWidth(0, TitleFontsize, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x+w-tw-20.0f, y, TitleFontsize, aBuf, -1);
 
 	// calculate measurements
 	x += 10.0f;
@@ -199,16 +199,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	// render headlines
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
-	TextRender()->Text(0, ScoreOffset+ScoreLength-tw, y, HeadlineFontsize, Localize("Score"), -1);
+	tw = IEngineTextRender::instance()->TextWidth(0, HeadlineFontsize, Localize("Score"), -1);
+	IEngineTextRender::instance()->Text(0, ScoreOffset+ScoreLength-tw, y, HeadlineFontsize, Localize("Score"), -1);
 
-	TextRender()->Text(0, NameOffset, y, HeadlineFontsize, Localize("Name"), -1);
+	IEngineTextRender::instance()->Text(0, NameOffset, y, HeadlineFontsize, Localize("Name"), -1);
 
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1);
-	TextRender()->Text(0, ClanOffset+ClanLength/2-tw/2, y, HeadlineFontsize, Localize("Clan"), -1);
+	tw = IEngineTextRender::instance()->TextWidth(0, HeadlineFontsize, Localize("Clan"), -1);
+	IEngineTextRender::instance()->Text(0, ClanOffset+ClanLength/2-tw/2, y, HeadlineFontsize, Localize("Clan"), -1);
 
-	tw = TextRender()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1);
-	TextRender()->Text(0, PingOffset+PingLength-tw, y, HeadlineFontsize, Localize("Ping"), -1);
+	tw = IEngineTextRender::instance()->TextWidth(0, HeadlineFontsize, Localize("Ping"), -1);
+	IEngineTextRender::instance()->Text(0, PingOffset+PingLength-tw, y, HeadlineFontsize, Localize("Ping"), -1);
 
 	// render player entries
 	y += HeadlineFontsize*2.0f;
@@ -225,35 +225,35 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// background so it's easy to find the local player or the followed one in spectator mode
 		if(pInfo->m_Local || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
 		{
-			Graphics()->TextureSet(-1);
-			Graphics()->QuadsBegin();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
+			IEngineGraphics::instance()->TextureSet(-1);
+			IEngineGraphics::instance()->QuadsBegin();
+			IEngineGraphics::instance()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);
 			RenderTools()->DrawRoundRect(x, y, w-20.0f, LineHeight, 15.0f);
-			Graphics()->QuadsEnd();
+			IEngineGraphics::instance()->QuadsEnd();
 		}
 
 		// score
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 999));
-		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		tw = IEngineTextRender::instance()->TextWidth(0, FontSize, aBuf, -1);
+		IEngineTextRender::instance()->SetCursor(&Cursor, ScoreOffset+ScoreLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ScoreLength;
-		TextRender()->TextEx(&Cursor, aBuf, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, aBuf, -1);
 
 		// flag
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags&GAMEFLAG_FLAGS &&
 			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == pInfo->m_ClientID ||
 			m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientID))
 		{
-			Graphics()->BlendNormal();
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
-			Graphics()->QuadsBegin();
+			IEngineGraphics::instance()->BlendNormal();
+			IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
+			IEngineGraphics::instance()->QuadsBegin();
 
 			RenderTools()->SelectSprite(pInfo->m_Team==TEAM_RED ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
 
 			float Size = LineHeight;
 			IGraphics::CQuadItem QuadItem(TeeOffset+0.0f, y-5.0f-Spacing/2.0f, Size/2.0f, Size);
-			Graphics()->QuadsDrawTL(&QuadItem, 1);
-			Graphics()->QuadsEnd();
+			IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+			IEngineGraphics::instance()->QuadsEnd();
 		}
 
 		// avatar
@@ -262,30 +262,30 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), vec2(TeeOffset+TeeLength/2, y+LineHeight/2));
 
 		// name
-		TextRender()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		IEngineTextRender::instance()->SetCursor(&Cursor, NameOffset, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = NameLength;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
 
 		// clan
-		tw = TextRender()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
-		TextRender()->SetCursor(&Cursor, ClanOffset+ClanLength/2-tw/2, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		tw = IEngineTextRender::instance()->TextWidth(0, FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		IEngineTextRender::instance()->SetCursor(&Cursor, ClanOffset+ClanLength/2-tw/2, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = ClanLength;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
 
 		// country flag
-		Graphics()->TextureSet(m_pClient->m_pCountryFlags->Get(m_pClient->m_aClients[pInfo->m_ClientID].m_Country)->m_Texture);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+		IEngineGraphics::instance()->TextureSet(m_pClient->m_pCountryFlags->Get(m_pClient->m_aClients[pInfo->m_ClientID].m_Country)->m_Texture);
+		IEngineGraphics::instance()->QuadsBegin();
+		IEngineGraphics::instance()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 		IGraphics::CQuadItem QuadItem(CountryOffset, y+(Spacing+TeeSizeMod*5.0f)/2.0f, CountryLength, LineHeight-Spacing-TeeSizeMod*5.0f);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Graphics()->QuadsEnd();
+		IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+		IEngineGraphics::instance()->QuadsEnd();
 
 		// ping
 		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 1000));
-		tw = TextRender()->TextWidth(0, FontSize, aBuf, -1);
-		TextRender()->SetCursor(&Cursor, PingOffset+PingLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		tw = IEngineTextRender::instance()->TextWidth(0, FontSize, aBuf, -1);
+		IEngineTextRender::instance()->SetCursor(&Cursor, PingOffset+PingLength-tw, y+Spacing, FontSize, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
-		TextRender()->TextEx(&Cursor, aBuf, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, aBuf, -1);
 
 		y += LineHeight+Spacing;
 	}
@@ -293,28 +293,28 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	if(!m_pClient->DemoRecorder()->IsRecording())
+	if(!IDemoRecorder::instance()->IsRecording())
 		return;
 
 	//draw the box
-	Graphics()->BlendNormal();
-	Graphics()->TextureSet(-1);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+	IEngineGraphics::instance()->BlendNormal();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
 	RenderTools()->DrawRoundRectExt(x, 0.0f, 180.0f, 50.0f, 15.0f, CUI::CORNER_B);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	//draw the red dot
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	IEngineGraphics::instance()->QuadsBegin();
+	IEngineGraphics::instance()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 	RenderTools()->DrawRoundRect(x+20, 15.0f, 20.0f, 20.0f, 10.0f);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsEnd();
 
 	//draw the text
 	char aBuf[64];
-	int Seconds = m_pClient->DemoRecorder()->Length();
+	int Seconds = IDemoRecorder::instance()->Length();
 	str_format(aBuf, sizeof(aBuf), Localize("REC %3d:%02d"), Seconds/60, Seconds%60);
-	TextRender()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
+	IEngineTextRender::instance()->Text(0, x+50.0f, 10.0f, 20.0f, aBuf, -1);
 }
 
 void CScoreboard::OnRender()
@@ -327,10 +327,10 @@ void CScoreboard::OnRender()
 		m_pClient->m_pMotd->Clear();
 
 
-	float Width = 400*3.0f*Graphics()->ScreenAspect();
+	float Width = 400*3.0f*IEngineGraphics::instance()->ScreenAspect();
 	float Height = 400*3.0f;
 
-	Graphics()->MapScreen(0, 0, Width, Height);
+	IEngineGraphics::instance()->MapScreen(0, 0, Width, Height);
 
 	float w = 700.0f;
 
@@ -363,8 +363,8 @@ void CScoreboard::OnRender()
 						str_copy(aText, Localize("Blue team wins!"), sizeof(aText));
 				}
 
-				float w = TextRender()->TextWidth(0, 86.0f, aText, -1);
-				TextRender()->Text(0, Width/2-w/2, 39, 86.0f, aText, -1);
+				float w = IEngineTextRender::instance()->TextWidth(0, 86.0f, aText, -1);
+				IEngineTextRender::instance()->Text(0, Width/2-w/2, 39, 86.0f, aText, -1);
 			}
 
 			RenderScoreboard(Width/2-w-5.0f, 150.0f, w, TEAM_RED, pRedClanName ? pRedClanName : Localize("Red team"));

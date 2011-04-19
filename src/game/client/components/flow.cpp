@@ -20,8 +20,8 @@ void CFlow::DbgRender()
 
 	IGraphics::CLineItem Array[1024];
 	int NumItems = 0;
-	Graphics()->TextureSet(-1);
-	Graphics()->LinesBegin();
+	IEngineGraphics::instance()->TextureSet(-1);
+	IEngineGraphics::instance()->LinesBegin();
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 		{
@@ -30,14 +30,14 @@ void CFlow::DbgRender()
 			Array[NumItems++] = IGraphics::CLineItem(Pos.x, Pos.y, Pos.x+Vel.x, Pos.y+Vel.y);
 			if(NumItems == 1024)
 			{
-				Graphics()->LinesDraw(Array, 1024);
+				IEngineGraphics::instance()->LinesDraw(Array, 1024);
 				NumItems = 0;
 			}
 		}
 
 	if(NumItems)
-		Graphics()->LinesDraw(Array, NumItems);
-	Graphics()->LinesEnd();
+		IEngineGraphics::instance()->LinesDraw(Array, NumItems);
+	IEngineGraphics::instance()->LinesEnd();
 }
 
 void CFlow::Init()

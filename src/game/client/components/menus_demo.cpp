@@ -29,21 +29,21 @@ int CMenus::DoButton_DemoPlayer(const void *pID, const char *pText, int Checked,
 int CMenus::DoButton_Sprite(const void *pID, int ImageID, int SpriteID, int Checked, const CUIRect *pRect, int Corners)
 {
 	RenderTools()->DrawUIRect(pRect, Checked ? vec4(1.0f, 1.0f, 1.0f, 0.10f) : vec4(1.0f, 1.0f, 1.0f, 0.5f)*ButtonColorMul(pID), Corners, 5.0f);
-	Graphics()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
-	Graphics()->QuadsBegin();
+	IEngineGraphics::instance()->TextureSet(g_pData->m_aImages[ImageID].m_Id);
+	IEngineGraphics::instance()->QuadsBegin();
 	if(!Checked)
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+		IEngineGraphics::instance()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 	RenderTools()->SelectSprite(SpriteID);
 	IGraphics::CQuadItem QuadItem(pRect->x, pRect->y, pRect->w, pRect->h);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	IEngineGraphics::instance()->QuadsDrawTL(&QuadItem, 1);
+	IEngineGraphics::instance()->QuadsEnd();
 
 	return UI()->DoButtonLogic(pID, "", Checked, pRect);
 }
 
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
-	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+	const IDemoPlayer::CInfo *pInfo = IDemoPlayer::instance()->BaseInfo();
 
 	const float SeekBarHeight = 15.0f;
 	const float ButtonbarHeight = 20.0f;
@@ -115,7 +115,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 					PrevAmount = Amount;
 					m_pClient->OnReset();
 					m_pClient->m_SuppressEvents = true;
-					DemoPlayer()->SetPos(Amount);
+					IDemoPlayer::instance()->SetPos(Amount);
 					m_pClient->m_SuppressEvents = false;
 				}
 			}
@@ -133,8 +133,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(CurrentTick == TotalTicks)
 	{
 		m_pClient->OnReset();
-		DemoPlayer()->Pause();
-		DemoPlayer()->SetPos(0);
+		IDemoPlayer::instance()->Pause();
+		IDemoPlayer::instance()->SetPos(0);
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
@@ -150,12 +150,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(!pInfo->m_Paused)
 		{
 			if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PAUSE, false, &Button, CUI::CORNER_ALL))
-				DemoPlayer()->Pause();
+				IDemoPlayer::instance()->Pause();
 		}
 		else
 		{
 			if(DoButton_Sprite(&s_PlayPauseButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_PLAY, false, &Button, CUI::CORNER_ALL))
-				DemoPlayer()->Unpause();
+				IDemoPlayer::instance()->Unpause();
 		}
 
 		// stop button
@@ -166,15 +166,15 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(DoButton_Sprite(&s_ResetButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_STOP, false, &Button, CUI::CORNER_ALL))
 		{
 			m_pClient->OnReset();
-			DemoPlayer()->Pause();
-			DemoPlayer()->SetPos(0);
+			IDemoPlayer::instance()->Pause();
+			IDemoPlayer::instance()->SetPos(0);
 		}
 
 		// slowdown
 		ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 		ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 		static int s_SlowDownButton = 0;
-		if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		if(DoButton_Sprite(&s_SlowDownButton, IMAGE_DEMOBUTTONS, SPRITE_DEMOBUTTON_SLOWER, 0, &Button, CUI::CORNER_ALL) || IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 			DecreaseDemoSpeed = true;
 
 		// fastforward
@@ -197,38 +197,38 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		ButtonBar.VSplitRight(ButtonbarHeight*3, &ButtonBar, &Button);
 		static int s_ExitButton = 0;
 		if(DoButton_DemoPlayer(&s_ExitButton, Localize("Close"), 0, &Button))
-			Client()->Disconnect();
+			IClient::instance()->Disconnect();
 
 		// demo name
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Demofile: %s", DemoPlayer()->GetDemoName());
+		str_format(aBuf, sizeof(aBuf), "Demofile: %s", IDemoPlayer::instance()->GetDemoName());
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
+		IEngineTextRender::instance()->SetCursor(&Cursor, NameBar.x, NameBar.y, Button.h*0.5f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = MainView.w;
-		TextRender()->TextEx(&Cursor, aBuf, -1);
+		IEngineTextRender::instance()->TextEx(&Cursor, aBuf, -1);
 	}
 
-	if(IncreaseDemoSpeed || Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+	if(IncreaseDemoSpeed || IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_UP))
 	{
-		if(pInfo->m_Speed < 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else if(pInfo->m_Speed < 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed < 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed < 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed < 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed < 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed < 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else DemoPlayer()->SetSpeed(8.0f);
+		if(pInfo->m_Speed < 0.1f) IDemoPlayer::instance()->SetSpeed(0.1f);
+		else if(pInfo->m_Speed < 0.25f) IDemoPlayer::instance()->SetSpeed(0.25f);
+		else if(pInfo->m_Speed < 0.5f) IDemoPlayer::instance()->SetSpeed(0.5f);
+		else if(pInfo->m_Speed < 0.75f) IDemoPlayer::instance()->SetSpeed(0.75f);
+		else if(pInfo->m_Speed < 1.0f) IDemoPlayer::instance()->SetSpeed(1.0f);
+		else if(pInfo->m_Speed < 2.0f) IDemoPlayer::instance()->SetSpeed(2.0f);
+		else if(pInfo->m_Speed < 4.0f) IDemoPlayer::instance()->SetSpeed(4.0f);
+		else IDemoPlayer::instance()->SetSpeed(8.0f);
 	}
-	else if(DecreaseDemoSpeed || Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+	else if(DecreaseDemoSpeed || IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 	{
-		if(pInfo->m_Speed > 4.0f) DemoPlayer()->SetSpeed(4.0f);
-		else if(pInfo->m_Speed > 2.0f) DemoPlayer()->SetSpeed(2.0f);
-		else if(pInfo->m_Speed > 1.0f) DemoPlayer()->SetSpeed(1.0f);
-		else if(pInfo->m_Speed > 0.75f) DemoPlayer()->SetSpeed(0.75f);
-		else if(pInfo->m_Speed > 0.5f) DemoPlayer()->SetSpeed(0.5f);
-		else if(pInfo->m_Speed > 0.25f) DemoPlayer()->SetSpeed(0.25f);
-		else if(pInfo->m_Speed > 0.1f) DemoPlayer()->SetSpeed(0.1f);
-		else DemoPlayer()->SetSpeed(0.05f);
+		if(pInfo->m_Speed > 4.0f) IDemoPlayer::instance()->SetSpeed(4.0f);
+		else if(pInfo->m_Speed > 2.0f) IDemoPlayer::instance()->SetSpeed(2.0f);
+		else if(pInfo->m_Speed > 1.0f) IDemoPlayer::instance()->SetSpeed(1.0f);
+		else if(pInfo->m_Speed > 0.75f) IDemoPlayer::instance()->SetSpeed(0.75f);
+		else if(pInfo->m_Speed > 0.5f) IDemoPlayer::instance()->SetSpeed(0.5f);
+		else if(pInfo->m_Speed > 0.25f) IDemoPlayer::instance()->SetSpeed(0.25f);
+		else if(pInfo->m_Speed > 0.1f) IDemoPlayer::instance()->SetSpeed(0.1f);
+		else IDemoPlayer::instance()->SetSpeed(0.05f);
 	}
 }
 
@@ -289,9 +289,9 @@ void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHe
 		Num = 0;
 	if(Num > 0)
 	{
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
+		if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_UP))
 			gs_ListBoxScrollValue -= 3.0f/Num;
-		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
+		if(IEngineInput::instance()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
 			gs_ListBoxScrollValue += 3.0f/Num;
 
 		if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;
@@ -371,7 +371,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected)
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (Input()->MouseDoubleClick() && UI()->ActiveItem() == pId))
+			if(m_EnterPressed || (IEngineInput::instance()->MouseDoubleClick() && UI()->ActiveItem() == pId))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(0);
@@ -469,7 +469,7 @@ void CMenus::DemolistPopulate()
 	m_lDemos.clear();
 	if(!str_comp(m_aCurrentDemoFolder, "demos"))
 		m_DemolistStorageType = IStorage::TYPE_ALL;
-	Storage()->ListDirectory(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
+	IStorage::instance()->ListDirectory(m_DemolistStorageType, m_aCurrentDemoFolder, DemolistFetchCallback, this);
 	m_lDemos.sort_range();
 }
 
@@ -504,7 +504,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				char aBuffer[512];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aCurrentDemoFolder, Item->m_aFilename);
-				Item->m_Valid = DemoPlayer()->GetDemoInfo(Storage(), aBuffer, Item->m_StorageType, &Item->m_Info);
+				Item->m_Valid = IDemoPlayer::instance()->GetDemoInfo(IStorage::instance(), aBuffer, Item->m_StorageType, &Item->m_Info);
 				Item->m_InfosLoaded = true;
 			}
 			if(!Item->m_Valid)
@@ -644,7 +644,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-				const char *pError = Client()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType);
+				const char *pError = IClient::instance()->DemoPlayer_Play(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType);
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else

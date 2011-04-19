@@ -43,9 +43,9 @@ public:
 	int m_Red, m_Green, m_Blue;
 };
 
-class IGraphics : public IInterface
+class IGraphics 
 {
-	MACRO_INTERFACE("graphics", 0)
+	
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
@@ -135,7 +135,7 @@ public:
 
 class IEngineGraphics : public IGraphics
 {
-	MACRO_INTERFACE("enginegraphics", 0)
+	SINGLETON_DEFAULT_DEF(IEngineGraphics)
 public:
 	virtual bool Init() = 0;
 	virtual void Shutdown() = 0;

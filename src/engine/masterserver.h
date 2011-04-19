@@ -5,9 +5,9 @@
 
 #include "kernel.h"
 
-class IMasterServer : public IInterface
+class IMasterServer 
 {
-	MACRO_INTERFACE("masterserver", 0)
+	
 public:
 
 	enum
@@ -31,7 +31,7 @@ public:
 
 class IEngineMasterServer : public IMasterServer
 {
-	MACRO_INTERFACE("enginemasterserver", 0)
+	SINGLETON_DEFAULT_DEF(IMasterServer)
 public:
 };
 

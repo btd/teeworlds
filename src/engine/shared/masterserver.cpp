@@ -119,8 +119,7 @@ public:
 
 	virtual void Init()
 	{
-		m_pEngine = Kernel()->RequestInterface<IEngine>();
-		m_pStorage = IStorage::instance();
+		
 	}
 
 	virtual void SetDefault()
@@ -132,6 +131,8 @@ public:
 
 	virtual int Load()
 	{
+	    boost::shared_ptr<IEngine> m_pEngine = IEngine::instance();
+		boost::shared_ptr<IStorage> m_pStorage = IStorage::instance();
 		CLineReader LineReader;
 		IOHANDLE File;
 		int Count = 0;

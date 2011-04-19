@@ -23,7 +23,7 @@ public:
 	void ScaleMin();
 
 	void Add(float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, int Font, float x, float y, float w, float h, const char *pDescription);
+	void Render(int Font, float x, float y, float w, float h, const char *pDescription);
 };
 
 
@@ -74,7 +74,7 @@ class CFileCollection
 	void BuildTimestring(int64 Timestamp, char *pTimestring);
 
 public:
-	void Init(boost::shared_ptr < IStorage > pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
+	void Init(const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
 	void AddEntry(int64 Timestamp);
 
 	static int FilelistCallback(const char *pFilename, int IsDir, int StorageType, void *pUser);
@@ -83,17 +83,6 @@ public:
 
 class CClient : public IClient, public CDemoPlayer::IListner
 {
-	// needed interfaces
-	IEngine *m_pEngine;
-	IEditor *m_pEditor;
-	IEngineInput *m_pInput;
-	IEngineGraphics *m_pGraphics;
-	IEngineSound *m_pSound;
-	IGameClient *m_pGameClient;
-	boost::shared_ptr< IEngineMap > m_pMap;
-	boost::shared_ptr< IConsole > m_pConsole;
-	boost::shared_ptr< IStorage > m_pStorage;
-	IEngineMasterServer *m_pMasterServer;
 
 	enum
 	{
@@ -203,14 +192,6 @@ class CClient : public IClient, public CDemoPlayer::IListner
 	} m_VersionInfo;
 
 public:
-	IEngine *Engine() { return m_pEngine; }
-	IEngineGraphics *Graphics() { return m_pGraphics; }
-	IEngineInput *Input() { return m_pInput; }
-	IEngineSound *Sound() { return m_pSound; }
-	IGameClient *GameClient() { return m_pGameClient; }
-	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
-	boost::shared_ptr< IStorage > Storage() { return m_pStorage; }
-
 	CClient();
 
 	// ----- send functions -----
